@@ -7,13 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.1.66" />
         <PackageReference Include="FluentResults" Version="3.16.0"/>
         <PackageReference Include="MediatR" Version="12.4.1"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Ports\Kafka\"/>
-        <Folder Include="Ports\Postgres\"/>
+        <Folder Include="Ports\Postgres\Repositories\" />
         <Folder Include="UseCases\Commands\"/>
     </ItemGroup>
 

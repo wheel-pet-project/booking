@@ -7,10 +7,9 @@ namespace Domain.CustomerAggregate;
 
 public sealed class Level : Entity<int>
 {
-    public static readonly Level Standart = new(1, nameof(Standart).ToLowerInvariant(), LoyaltyPoints.Create(1));
-
-    public static readonly Level
-        Trustworthy = new(2, nameof(Trustworthy).ToLowerInvariant(), LoyaltyPoints.Create(100));
+    public static readonly Level Standart = new(1, nameof(Standart).ToLowerInvariant(), LoyaltyPoints.Create());
+    public static readonly Level Trustworthy = new(2, nameof(Trustworthy).ToLowerInvariant(),
+        LoyaltyPoints.Create(100));
 
     private Level()
     {
@@ -24,7 +23,7 @@ public sealed class Level : Entity<int>
     }
 
     public string Name { get; private set; } = null!;
-    public LoyaltyPoints NeededPoints { get; private set; }
+    public LoyaltyPoints NeededPoints { get; private set; } = null!;
 
     public bool IsNeededChange(LoyaltyPoints currentPoints)
     {
@@ -33,16 +32,16 @@ public sealed class Level : Entity<int>
         return currentPoints < NeededPoints || (nextLevel is not null && currentPoints > nextLevel.NeededPoints);
     }
 
-    public Level GetChangeToOneLevel(LoyaltyPoints currentPoints)
+    public Level GetNewLevelForChanging(LoyaltyPoints currentPoints)
     {
-        if (IsNeededChange(currentPoints) == false)
-            throw new DomainRulesViolationException($"{nameof(currentPoints)} not in range for changing level");
+        if (IsNeededChange(currentPoints) == false) throw new DomainRulesViolationException(
+            $"{nameof(currentPoints)} not in range for changing level");
 
         if (currentPoints < NeededPoints) return All().SingleOrDefault(x => x.Id == Id - 1) ?? Standart;
 
         var nextLevel = All().SingleOrDefault(x => x.Id == Id + 1);
-        if (nextLevel == null)
-            throw new DomainRulesViolationException("This level already max, validation for needing incorrect");
+        if (nextLevel == null) throw new DomainRulesViolationException(
+                "This level already max, validation for needing changing incorrect");
 
         return nextLevel;
     }

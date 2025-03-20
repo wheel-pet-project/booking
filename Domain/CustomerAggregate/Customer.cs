@@ -6,7 +6,7 @@ using Domain.VehicleAggregate;
 
 namespace Domain.CustomerAggregate;
 
-public sealed class Customer : Aggregate
+public sealed class Customer
 {
     private readonly List<Category> _categories = [];
 
@@ -35,10 +35,7 @@ public sealed class Customer : Aggregate
 
     public void ChangeToOneLevel()
     {
-        if (Level.IsNeededChange(Points) == false)
-            throw new DomainRulesViolationException("Level cannot be changed, because changing not needed");
-
-        var newLevel = Level.GetChangeToOneLevel(Points);
+        var newLevel = Level.GetNewLevelForChanging(Points);
 
         Level = newLevel;
     }

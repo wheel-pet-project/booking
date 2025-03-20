@@ -42,17 +42,17 @@ public sealed class LoyaltyPoints : ValueObject
 
     public static bool operator <(LoyaltyPoints? a, LoyaltyPoints? b)
     {
-        if (a is null && b is null)
-            return true;
-
         if (a is null || b is null)
             return false;
 
         return a.Value < b.Value;
     }
 
-    public static bool operator >(LoyaltyPoints a, LoyaltyPoints b)
+    public static bool operator >(LoyaltyPoints? a, LoyaltyPoints? b)
     {
+        if (a is null || b is null)
+            return false;
+        
         return !(a < b);
     }
 

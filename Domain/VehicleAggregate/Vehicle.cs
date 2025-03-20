@@ -10,7 +10,7 @@ public sealed class Vehicle : Aggregate
     {
     }
 
-    private Vehicle(Guid id, Category category)
+    private Vehicle(Guid id, Category category) : this()
     {
         Id = id;
         Category = category;
