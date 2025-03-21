@@ -34,7 +34,7 @@ public class LoyaltyPointsShould
             LoyaltyPoints.Create(startPoints);
         }
 
-// Assert
+        // Assert
         Assert.Throws<ValueOutOfRangeException>(Act);
     }
 
@@ -108,5 +108,61 @@ public class LoyaltyPointsShould
 
         // Assert
         Assert.True(actual);
+    }
+
+    [Fact]
+    public void GreaterThanOperatorReturnsTrueForLessPointsQuantity()
+    {
+        // Arrange
+        var points1 = LoyaltyPoints.Create(10);
+        var points2 = LoyaltyPoints.Create(5);
+
+        // Act
+        var actual = points1 > points2;
+
+        // Assert
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void LessThanOperatorReturnsTrueForGreaterPointsQuantity()
+    {
+        // Arrange
+        var points1 = LoyaltyPoints.Create(5);
+        var points2 = LoyaltyPoints.Create(10);
+
+        // Act
+        var actual = points1 < points2;
+
+        // Assert
+        Assert.True(actual);
+    }
+
+    [Fact]
+    public void LessThanOperatorReturnsFalseForOneOfNull()
+    {
+        // Arrange
+        LoyaltyPoints points1 = null!;
+        var points2 = LoyaltyPoints.Create(10);
+
+        // Act
+        var actual = points1 < points2;
+
+        // Assert
+        Assert.False(actual);
+    }
+
+    [Fact]
+    public void GreaterThanOperatorReturnsFalseForOneOfNull()
+    {
+        // Arrange
+        LoyaltyPoints points1 = null!;
+        var points2 = LoyaltyPoints.Create(10);
+
+        // Act
+        var actual = points1 > points2;
+
+        // Assert
+        Assert.False(actual);
     }
 }

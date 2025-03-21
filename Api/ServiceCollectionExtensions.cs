@@ -3,6 +3,9 @@ using Infrastructure.Adapters.Postgres.Inbox;
 using Infrastructure.Adapters.Postgres.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Quartz;
 using Serilog;
 using Serilog.Events;
@@ -30,13 +33,13 @@ public static class ServiceCollectionExtensions
                 PostgresPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password",
                 BootstrapServers = (Environment.GetEnvironmentVariable("BOOTSTRAP_SERVERS") ??
                                     "localhost:9092").Split("__"),
-                DrivingLicenseApprovedTopic = Environment.GetEnvironmentVariable("DROVING_LICENSE_APPROVED_TOPIC") ??
+                DrivingLicenseApprovedTopic = Environment.GetEnvironmentVariable("DRIVING_LICENSE_APPROVED_TOPIC") ??
                                               "driving-license-approved-topic",
                 DrivingLicenseExpiredTopic = Environment.GetEnvironmentVariable("DRIVING_LICENCE_EXPIRED_TOPIC") ?? 
                                              "driving-license-expired-topic",
-                VehicleDeletedTopic = Environment.GetEnvironmentVariable("VEHICLE_DELETED_TOPIC") ??
-                                               "vehicle-deleted-topic",
                 VehicleAddedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDED_TOPIC") ?? "vehicle-added-topic",
+                VehicleDeletedTopic = Environment.GetEnvironmentVariable("VEHICLE_DELETED_TOPIC") ??
+                                      "vehicle-deleted-topic",
                 MongoConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING") ??
                                         "mongodb://carsharing:password@localhost:27017/drivinglicense?authSource=admin"
             },
@@ -49,8 +52,8 @@ public static class ServiceCollectionExtensions
                 PostgresUsername = GetEnvironmentOrThrow("POSTGRES_USER"),
                 PostgresPassword = GetEnvironmentOrThrow("POSTGRES_PASSWORD"),
                 BootstrapServers = GetEnvironmentOrThrow("BOOTSTRAP_SERVERS").Split("__"),
-                OsagoExpiredTopic = GetEnvironmentOrThrow("OSAGO_EXPIRED_TOPIC"),
-                DocumentAddingCompletedTopic = GetEnvironmentOrThrow("DOCUMENTS_ADDING_COMPLETED_TOPIC"),
+                DrivingLicenseApprovedTopic = GetEnvironmentOrThrow("DRIVING_LICENSE_APPROVED_TOPIC"),
+                DrivingLicenseExpiredTopic = GetEnvironmentOrThrow("DRIVING_LICENCE_EXPIRED_TOPIC"),
                 VehicleAddedTopic = GetEnvironmentOrThrow("VEHICLE_ADDED_TOPIC"),
                 VehicleDeletedTopic = GetEnvironmentOrThrow("VEHICLE_DELETED_TOPIC"),
                 MongoConnectionString = GetEnvironmentOrThrow("MONGO_CONNECTION_STRING")
@@ -107,31 +110,31 @@ public static class ServiceCollectionExtensions
         //
         // // Commands
         // services.AddTransient<IRequestHandler<AddOsagoCommand, Result>, AddOsagoHandler>();
-        // services.AddTransient<IRequestHandler<AddPtsToVehicleDocumentsCommand, Result>,
-        //     AddPtsToVehicleDocumentsHandler>();
-        // services.AddTransient<IRequestHandler<AddStsToVehicleDocumentsCommand, Result>,
-        //     AddStsToVehicleDocumentsHandler>();
-        // services.AddTransient<IRequestHandler<AddVehicleDocumentsCommand, Result>, AddVehicleDocumentsHandler>();
+        // services.AddTransient<IRequestHandler<AddPtsToBookingCommand, Result>,
+        //     AddPtsToBookingHandler>();
+        // services.AddTransient<IRequestHandler<AddStsToBookingCommand, Result>,
+        //     AddStsToBookingHandler>();
+        // services.AddTransient<IRequestHandler<AddBookingCommand, Result>, AddBookingHandler>();
         //
         //
         // // Queries
         // var serviceProvider = services.BuildServiceProvider();
         // services
         //     .AddTransient<
-        //         IRequestHandler<GetVehicleDocumentsByVehicleIdQuery,
-        //             Result<GetVehicleDocumentsByVehicleIdQueryResponse>>, GetVehicleDocumentsByVehicleIdQueryHandler>();
+        //         IRequestHandler<GetBookingByVehicleIdQuery,
+        //             Result<GetBookingByVehicleIdQueryResponse>>, GetBookingByVehicleIdQueryHandler>();
         // services
-        //     .AddTransient<IRequestHandler<GetStsByVehicleDocumentsIdQuery,
-        //         Result<GetStsByVehicleDocumentsIdQueryResponse>>>(_ =>
-        //         new GetStsByVehicleDocumentsIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
+        //     .AddTransient<IRequestHandler<GetStsByBookingIdQuery,
+        //         Result<GetStsByBookingIdQueryResponse>>>(_ =>
+        //         new GetStsByBookingIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
         //             Configuration.AwsServiceUrl));
-        // services.AddTransient<IRequestHandler<GetPtsByVehicleDocumentsIdQuery,
-        //     Result<GetPtsByVehicleDocumentsIdQueryResponse>>>(_ =>
-        //     new GetPtsByVehicleDocumentsIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
+        // services.AddTransient<IRequestHandler<GetPtsByBookingIdQuery,
+        //     Result<GetPtsByBookingIdQueryResponse>>>(_ =>
+        //     new GetPtsByBookingIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
         //         Configuration.AwsServiceUrl));
-        // services.AddTransient<IRequestHandler<GetOsagoByVehicleDocumentsIdQuery,
-        //     Result<GetOsagoByVehicleDocumentsIdQueryResponse>>>(_ =>
-        //     new GetOsagoByVehicleDocumentsIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
+        // services.AddTransient<IRequestHandler<GetOsagoByBookingIdQuery,
+        //     Result<GetOsagoByBookingIdQueryResponse>>>(_ =>
+        //     new GetOsagoByBookingIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
         //         Configuration.AwsServiceUrl));
         //
         // // Domain event handlers
@@ -161,7 +164,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection RegisterRepositories(this IServiceCollection services)
     {
         // services.AddTransient<IOsagoRepository, OsagoRepository>();
-        // services.AddTransient<IVehicleDocumentsRepository, VehicleDocumentsRepository>();
+        // services.AddTransient<IBookingRepository, BookingRepository>();
 
         return services;
     }
@@ -290,9 +293,10 @@ public static class ServiceCollectionExtensions
                     .AddGrpcCoreInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddNpgsql()
+                    .AddQuartzInstrumentation()
                     .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                        .AddService("VehicleDocuments"))
-                    .AddSource("VehicleDocuments")
+                        .AddService("Booking"))
+                    .AddSource("Booking")
                     .AddSource("MassTransit")
                     .AddJaegerExporter();
             });

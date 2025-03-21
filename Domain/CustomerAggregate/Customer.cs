@@ -1,8 +1,7 @@
-using Domain.SharedKernel;
 using Domain.SharedKernel.Exceptions.ArgumentException;
-using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
 using Domain.SharedKernel.ValueObjects;
 using Domain.VehicleAggregate;
+using Domain.VehicleModelAggregate;
 
 namespace Domain.CustomerAggregate;
 
@@ -40,11 +39,11 @@ public sealed class Customer
         Level = newLevel;
     }
 
-    public bool CanBookThisVehicle(Vehicle vehicle)
+    public bool CanBookThisVehicleModel(VehicleModel vehicleModel)
     {
-        if (vehicle == null) throw new ValueIsRequiredException($"{nameof(vehicle)} cannot be null");
+        if (vehicleModel == null) throw new ValueIsRequiredException($"{nameof(vehicleModel)} cannot be null");
 
-        return IsCanBooking && _categories.Contains(vehicle.Category);
+        return IsCanBooking && _categories.Contains(vehicleModel.Category);
     }
 
     public void AddTrip()
