@@ -1,7 +1,6 @@
 using Domain.CustomerAggregate;
 using Domain.SharedKernel.Exceptions.ArgumentException;
 using Domain.SharedKernel.ValueObjects;
-using Domain.VehicleAggregate;
 using Domain.VehicleModelAggregate;
 using JetBrains.Annotations;
 using Xunit;

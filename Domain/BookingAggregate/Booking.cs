@@ -3,6 +3,7 @@ using Domain.SharedKernel;
 using Domain.SharedKernel.Exceptions.ArgumentException;
 using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
 using Domain.SharedKernel.ValueObjects;
+using Domain.VehicleModelAggregate;
 
 namespace Domain.BookingAggregate;
 
@@ -73,11 +74,15 @@ public sealed class Booking : Aggregate
         End = timeProvider.GetUtcNow().DateTime;
     }
 
-    public static Booking Create(Customer customer, Guid vehicleId)
+    public static Booking Create(Customer customer, VehicleModel vehicleModel, Guid vehicleId)
     {
         if (customer == null) throw new ValueIsRequiredException($"{nameof(customer)} cannot be null");
+        if (vehicleModel == null) throw new ValueIsRequiredException($"{nameof(vehicleModel)} cannot be null");
         if (vehicleId == Guid.Empty) throw new ValueIsRequiredException($"{nameof(vehicleId)} cannot be empty");
-
+        
+        if (customer.CanBookThisVehicleModel(vehicleModel) == false) throw new DomainRulesViolationException(
+            "Customer can't book this vehicle");
+        
         return new Booking(customer.Id, vehicleId, customer.Level.GetFreeWaitDuration());
     }
 }

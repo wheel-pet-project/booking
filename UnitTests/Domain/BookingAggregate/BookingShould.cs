@@ -58,6 +58,33 @@ public class BookingShould
     }
 
     [Fact]
+    public void MarkAsNotBookedChangeStatus()
+    {
+        // Arrange
+        var booking = Booking.Create(_customer, _vehicleId);
+
+        // Act
+        booking.MarkAsNotBooked();
+
+        // Assert
+        Assert.Equal(Status.NotBooked, booking.Status);
+    }
+
+    [Fact]
+    public void MarkAsNotBookedThrowsDomainRuleViolationExceptionIfBookingCannotBeMarkedAsNotBooked()
+    {
+        // Arrange
+        var booking = Booking.Create(_customer, _vehicleId);
+        booking.Book(_timeProvider);
+
+        // Act
+        void Act() => booking.MarkAsNotBooked();
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
+    }
+
+    [Fact]
     public void BookChangeStatus()
     {
         // Arrange

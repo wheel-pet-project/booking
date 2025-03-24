@@ -1,0 +1,22 @@
+using Domain.VehicleAggregate;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Adapters.Postgres.Repositories;
+
+public class VehicleRepository(DataContext context)
+{
+    public async Task<Vehicle?> GetById(Guid id)
+    {
+        return await context.Vehicles.FirstOrDefaultAsync(x => x.Id == id);
+    }
+    
+    public async Task Add(Vehicle vehicle)
+    {
+        await context.Vehicles.AddAsync(vehicle);
+    }
+
+    public void Update(Vehicle vehicle)
+    {
+        context.Vehicles.Update(vehicle);
+    }
+}

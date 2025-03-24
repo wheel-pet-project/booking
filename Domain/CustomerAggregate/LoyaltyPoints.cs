@@ -56,6 +56,20 @@ public sealed class LoyaltyPoints : ValueObject
         return !(a < b);
     }
 
+    public static bool operator <(LoyaltyPoints? a, int b)
+    {
+        if (a is null) return false;
+
+        return a.Value < b;
+    }
+
+    public static bool operator >(LoyaltyPoints? a, int b)
+    {
+        if (a is null) return false;
+        
+        return !(a < b);
+    }
+
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value;

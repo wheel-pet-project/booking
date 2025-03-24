@@ -7,15 +7,14 @@ namespace Domain.CustomerAggregate;
 
 public sealed class Level : Entity<int>
 {
-    public static readonly Level Standart = new(1, nameof(Standart).ToLowerInvariant(), LoyaltyPoints.Create());
-    public static readonly Level Trustworthy = new(2, nameof(Trustworthy).ToLowerInvariant(),
-        LoyaltyPoints.Create(100));
+    public static readonly Level Standart = new(1, nameof(Standart).ToLowerInvariant(), LoyaltyPoints.Create(1));
+    public static readonly Level Trustworthy = new(2, nameof(Trustworthy).ToLowerInvariant(), LoyaltyPoints.Create(100));
 
     private Level()
     {
     }
 
-    public Level(int id, string name, LoyaltyPoints neededPoints) : this()
+    private Level(int id, string name, LoyaltyPoints neededPoints) : this()
     {
         Id = id;
         Name = name;

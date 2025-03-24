@@ -27,7 +27,8 @@ public class InboxBackgroundJob(
     public async Task Execute(IJobExecutionContext jobExecutionContext)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
-        var inboxEvents = (await connection.QueryAsync<InboxEvent>(QuerySql)).AsList().AsReadOnly();
+        await using var transaction = await connection.BeginTransactionAsync();
+        var inboxEvents = (await connection.QueryAsync<InboxEvent>(QuerySql, transaction)).AsList().AsReadOnly();
 
         if (inboxEvents.Count > 0)
         {
@@ -58,8 +59,7 @@ public class InboxBackgroundJob(
                 parameters.Add($"EventId{i}", updateList[i]);
                 parameters.Add($"ProcessedOnUtc{i}", processedTime);
             }
-
-            await using var transaction = await connection.BeginTransactionAsync();
+            
             await connection.ExecuteAsync(formattedSql, parameters, transaction);
 
             await transaction.CommitAsync();

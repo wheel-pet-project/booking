@@ -1,6 +1,5 @@
 using Domain.SharedKernel.Exceptions.ArgumentException;
 using Domain.SharedKernel.ValueObjects;
-using Domain.VehicleAggregate;
 using Domain.VehicleModelAggregate;
 
 namespace Domain.CustomerAggregate;

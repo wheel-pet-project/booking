@@ -72,6 +72,33 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("status", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "inprocess"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "notbooked"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "booked"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "canceled"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "completed"
+                        });
                 });
 
             modelBuilder.Entity("Domain.CustomerAggregate.Customer", b =>
@@ -118,9 +145,27 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
+                    b.Property<int>("NeededPoints")
+                        .HasColumnType("integer")
+                        .HasColumnName("needed_points");
+
                     b.HasKey("Id");
 
                     b.ToTable("level", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "standart",
+                            NeededPoints = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "trustworthy",
+                            NeededPoints = 100
+                        });
                 });
 
             modelBuilder.Entity("Domain.VehicleAggregate.Vehicle", b =>
@@ -279,29 +324,6 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                         .HasConstraintName("FK_level_id");
 
                     b.Navigation("Level");
-                });
-
-            modelBuilder.Entity("Domain.CustomerAggregate.Level", b =>
-                {
-                    b.OwnsOne("Domain.CustomerAggregate.LoyaltyPoints", "NeededPoints", b1 =>
-                        {
-                            b1.Property<int>("LevelId")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Value")
-                                .HasColumnType("integer")
-                                .HasColumnName("needed_points");
-
-                            b1.HasKey("LevelId");
-
-                            b1.ToTable("level");
-
-                            b1.WithOwner()
-                                .HasForeignKey("LevelId");
-                        });
-
-                    b.Navigation("NeededPoints")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.VehicleAggregate.Vehicle", b =>

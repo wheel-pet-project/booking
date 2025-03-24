@@ -14,6 +14,7 @@ public class DataContext : DbContext
 {
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Vehicle> Vehicles { get; set; }
+    public DbSet<VehicleModel> VehicleModels { get; set; }
     public DbSet<Booking> Bookings { get; set; }
     public DbSet<OutboxEvent> Outbox { get; set; }
     public DbSet<InboxEvent> Inbox { get; set; }
@@ -67,9 +68,12 @@ internal class LevelEntityTypeConfiguration : IEntityTypeConfiguration<Level>
         
         builder.Property(x => x.Id).ValueGeneratedNever().HasColumnName("id");
         builder.Property(x => x.Name).HasColumnName("name").IsRequired();
+
+        // Todo: временное решение, OwnsOne с HasData не дружат https://github.com/dotnet/efcore/issues/31373 ничего лучше пока не придумал
+        builder.Property<LoyaltyPoints>(x => x.NeededPoints)
+            .HasConversion<int>(to => to.Value, from => LoyaltyPoints.Create(from)).HasColumnName("needed_points");
         
-        builder.OwnsOne(x => x.NeededPoints,
-            cfg => cfg.Property(x => x.Value).HasColumnName("needed_points").IsRequired());
+        builder.HasData(Level.All());
     }
 }
 
@@ -143,7 +147,7 @@ internal class BookingEntityTypeConfiguration : IEntityTypeConfiguration<Booking
         {
             cfg.Property(x => x.Duration).HasColumnName("free_wait_duration");
         });
-
+        
         builder.Ignore(x => x.DomainEvents);
     }
 }
@@ -158,6 +162,8 @@ internal class StatusEntityTypeConfiguration : IEntityTypeConfiguration<Status>
         
         builder.Property(x => x.Id).ValueGeneratedNever().HasColumnName("id");
         builder.Property(x => x.Name).HasColumnName("name").IsRequired();
+        
+        builder.HasData(Status.All());
     }
 }
 

@@ -45,4 +45,9 @@
       <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Adapters\Grpc\" />
+      <Folder Include="Adapters\Kafka\" />
+    </ItemGroup>
+
 </Project>

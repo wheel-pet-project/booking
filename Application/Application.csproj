@@ -14,8 +14,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Ports\Postgres\Repositories\" />
-        <Folder Include="UseCases\Commands\"/>
+        <Folder Include="UseCases\Commands\Booking\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 
 </Project>

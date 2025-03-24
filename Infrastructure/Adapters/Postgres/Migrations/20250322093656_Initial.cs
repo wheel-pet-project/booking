@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Infrastructure.Adapters.Postgres.Migrations
 {
     /// <inheritdoc />
@@ -152,6 +154,27 @@ namespace Infrastructure.Adapters.Postgres.Migrations
                         principalTable: "vehicle",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "level",
+                columns: new[] { "id", "name", "needed_points" },
+                values: new object[,]
+                {
+                    { 1, "standart", 1 },
+                    { 2, "trustworthy", 100 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "status",
+                columns: new[] { "id", "name" },
+                values: new object[,]
+                {
+                    { 1, "inprocess" },
+                    { 2, "notbooked" },
+                    { 3, "booked" },
+                    { 4, "canceled" },
+                    { 5, "completed" }
                 });
 
             migrationBuilder.CreateIndex(
