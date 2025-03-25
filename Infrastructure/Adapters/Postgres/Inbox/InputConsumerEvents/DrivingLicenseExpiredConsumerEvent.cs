@@ -1,3 +1,5 @@
+using Application.UseCases.Commands.Customer.AddCustomerOrEnableBookingRights;
+using Application.UseCases.Commands.Customer.RevokeCustomerBookingRights;
 using FluentResults;
 using MediatR;
 
@@ -10,6 +12,6 @@ public class DrivingLicenseExpiredConsumerEvent(Guid eventId, Guid accountId) : 
     
     public IRequest<Result> ToCommand()
     {
-        throw new NotImplementedException();
+        return new RevokeCustomerBookingRightsCommand(AccountId);
     }
 }

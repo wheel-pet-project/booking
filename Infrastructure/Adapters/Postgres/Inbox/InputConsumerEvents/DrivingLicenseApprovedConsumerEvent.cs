@@ -1,3 +1,4 @@
+using Application.UseCases.Commands.Customer.AddCustomerOrEnableBookingRights;
 using FluentResults;
 using MediatR;
 
@@ -14,6 +15,6 @@ public class DrivingLicenseApprovedConsumerEvent(
     
     public IRequest<Result> ToCommand()
     {
-        throw new NotImplementedException();
+        return new AddCustomerOrEnableBookingCommand(AccountId, Categories);
     }
 }

@@ -1,3 +1,4 @@
+using Application.UseCases.Commands.Vehicle.DeleteVehicle;
 using FluentResults;
 using MediatR;
 
@@ -10,6 +11,6 @@ public class VehicleDeletedConsumerEvent(Guid eventId, Guid vehicleId) : IInputC
     
     public IRequest<Result> ToCommand()
     {
-        throw new NotImplementedException();
+        return new DeleteVehicleCommand(VehicleId);
     }
 }

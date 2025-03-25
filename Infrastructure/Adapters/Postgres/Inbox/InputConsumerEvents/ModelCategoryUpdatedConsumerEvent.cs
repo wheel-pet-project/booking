@@ -1,3 +1,4 @@
+using Application.UseCases.Commands.VehicleModel.ChangeVehicleModelCategory;
 using FluentResults;
 using MediatR;
 
@@ -11,6 +12,6 @@ public class ModelCategoryUpdatedConsumerEvent(Guid eventId, Guid modelId, char 
     
     public IRequest<Result> ToCommand()
     {
-        throw new NotImplementedException();
+        return new ChangeVehicleModelCategoryCommand(ModelId, Category);
     }
 }

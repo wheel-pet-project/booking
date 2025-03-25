@@ -1,3 +1,4 @@
+using Application.UseCases.Commands.Vehicle.AddVehicle;
 using FluentResults;
 using MediatR;
 
@@ -11,6 +12,6 @@ public class VehicleAddedConsumerEvent(Guid eventId, Guid vehicleId, Guid modelI
     
     public IRequest<Result> ToCommand()
     {
-        throw new NotImplementedException();
+        return new AddVehicleCommand(VehicleId, ModelId);
     }
 }

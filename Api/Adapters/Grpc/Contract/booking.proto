@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "Api";
+
+package vehicledocuments.v1;
+
+service VehicleDocuments {
+  rpc BookVehicle (BookVehicleRequest) returns (BookVehicleResponse);
+  rpc CancelBookingVehicle (CancelBookingRequest) returns (CancelBookingResponse);
+}
+
+message BookVehicleRequest{
+  string vehicle_id = 1;
+  string customer_id = 2;
+}
+message BookVehicleResponse{}
+
+
+message CancelBookingRequest{
+  string booking_id = 1;
+}
+message CancelBookingResponse{}
+
+
+
