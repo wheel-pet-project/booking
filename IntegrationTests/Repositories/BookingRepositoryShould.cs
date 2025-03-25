@@ -23,7 +23,7 @@ public class BookingRepositoryShould : IntegrationTestBase
         
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
         
-        var booking = Booking.Create(_customer, vehicle.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
         
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
@@ -33,9 +33,9 @@ public class BookingRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
-        var modelFromDb = await repository.GetById(_customer.Id);
+        var modelFromDb = await repository.GetById(booking.Id);
         Assert.NotNull(modelFromDb);
-        Assert.Equivalent(_customer, modelFromDb);
+        Assert.Equivalent(booking, modelFromDb);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class BookingRepositoryShould : IntegrationTestBase
         
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
         
-        var booking = Booking.Create(_customer, vehicle.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
         
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repositoryForArrange, uowForArrange) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
@@ -63,9 +63,9 @@ public class BookingRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
-        var modelFromDb = await repository.GetById(_customer.Id);
+        var modelFromDb = await repository.GetById(booking.Id);
         Assert.NotNull(modelFromDb);
-        Assert.Equivalent(_customer, modelFromDb);
+        Assert.Equivalent(booking, modelFromDb);
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class BookingRepositoryShould : IntegrationTestBase
         
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
         
-        var booking = Booking.Create(_customer, vehicle.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
         
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
@@ -85,11 +85,11 @@ public class BookingRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Act
-        var actual = await repository.GetById(_customer.Id);
+        var actual = await repository.GetById(booking.Id);
 
         // Assert
         Assert.NotNull(actual);
-        Assert.Equivalent(_customer, actual);
+        Assert.Equivalent(booking, actual);
     }
 
     private async Task AddVehicleModelAndVehicleAndCustomer(
@@ -101,6 +101,9 @@ public class BookingRepositoryShould : IntegrationTestBase
         await Context.SaveChangesAsync();
         
         await Context.Vehicles.AddAsync(vehicle);
+        
+        Context.Attach(customer.Level);
+        
         await Context.Customers.AddAsync(customer);
         await Context.SaveChangesAsync();
     }

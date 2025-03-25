@@ -3,9 +3,14 @@ using MediatR;
 
 namespace Infrastructure.Adapters.Postgres.Inbox.InputConsumerEvents;
 
-public class DrivingLicenseApprovedConsumerEvent : IInputConsumerEvent
+public class DrivingLicenseApprovedConsumerEvent(
+    Guid eventId, 
+    Guid accountId,
+    List<char> categories) : IInputConsumerEvent
 {
-    public Guid EventId { get; }
+    public Guid EventId { get; } = eventId;
+    public Guid AccountId { get; } = accountId;
+    public List<char> Categories { get; } = categories;
     
     public IRequest<Result> ToCommand()
     {

@@ -1,3 +1,4 @@
+using Domain.BookingAggregate.DomainEvents;
 using Domain.CustomerAggregate;
 using Domain.SharedKernel;
 using Domain.SharedKernel.Exceptions.ArgumentException;
@@ -72,6 +73,8 @@ public sealed class Booking : Aggregate
         Status = Status.Canceled;
 
         End = timeProvider.GetUtcNow().DateTime;
+        
+        AddDomainEvent(new BookingCanceledDomainEvent(Id, VehicleId, CustomerId));
     }
 
     public static Booking Create(Customer customer, VehicleModel vehicleModel, Guid vehicleId)
@@ -83,6 +86,10 @@ public sealed class Booking : Aggregate
         if (customer.CanBookThisVehicleModel(vehicleModel) == false) throw new DomainRulesViolationException(
             "Customer can't book this vehicle");
         
-        return new Booking(customer.Id, vehicleId, customer.Level.GetFreeWaitDuration());
+        var booking = new Booking(customer.Id, vehicleId, customer.Level.GetFreeWaitDuration());
+        
+        booking.AddDomainEvent(new BookingCreatedDomainEvent(booking.Id, booking.VehicleId, booking.CustomerId));
+        
+        return booking;
     }
 }

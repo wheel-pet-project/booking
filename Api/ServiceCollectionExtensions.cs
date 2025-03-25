@@ -1,6 +1,19 @@
+using Api.Adapters.Kafka;
+using Application.Ports.Kafka;
+using Application.Ports.Postgres;
+using Application.Ports.Postgres.Repositories;
+using Application.UseCases.Commands.Booking.BookVehicle;
+using Confluent.Kafka;
+using From.BookingKafkaEvents;
+using From.DrivingLicenseKafkaEvents;
+using From.VehicleFleetKafkaEvents.Model;
+using From.VehicleFleetKafkaEvents.Vehicle;
+using Infrastructure.Adapters.Kafka;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Inbox;
 using Infrastructure.Adapters.Postgres.Outbox;
+using Infrastructure.Adapters.Postgres.Repositories;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using OpenTelemetry.Metrics;
@@ -35,13 +48,23 @@ public static class ServiceCollectionExtensions
                                     "localhost:9092").Split("__"),
                 DrivingLicenseApprovedTopic = Environment.GetEnvironmentVariable("DRIVING_LICENSE_APPROVED_TOPIC") ??
                                               "driving-license-approved-topic",
-                DrivingLicenseExpiredTopic = Environment.GetEnvironmentVariable("DRIVING_LICENCE_EXPIRED_TOPIC") ?? 
+                DrivingLicenseExpiredTopic = Environment.GetEnvironmentVariable("DRIVING_LICENCE_EXPIRED_TOPIC") ??
                                              "driving-license-expired-topic",
                 VehicleAddedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDED_TOPIC") ?? "vehicle-added-topic",
                 VehicleDeletedTopic = Environment.GetEnvironmentVariable("VEHICLE_DELETED_TOPIC") ??
                                       "vehicle-deleted-topic",
+                VehicleAddingProccessedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDING_PROCESSED_TOPIC") ??
+                                               "vehicle-adding-proccessed-topic",
+                BookingCreatedTopic = Environment.GetEnvironmentVariable("BOOKING_CREATED_TOPIC") ??
+                                      "booking-created-topic",
+                BookingCanceledTopic = Environment.GetEnvironmentVariable("BOOKING_CANCELED_TOPIC") ??
+                                       "booking-canceled-topic",
+                ModelCreatedTopic = Environment.GetEnvironmentVariable("MODEL_CREATED_TOPIC") ??
+                "model-created-topic",
+                ModelCategoryUpdatedTopic = Environment.GetEnvironmentVariable("MODEL_CATEGORY_UPDATED_TOPIC") ??
+                                            "model-category-updated-topic",
                 MongoConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING") ??
-                                        "mongodb://carsharing:password@localhost:27017/drivinglicense?authSource=admin"
+                                        "mongodb://carsharing:password@localhost:27017/drivinglicense?authSource=admin",
             },
             "Production" => new Configuration
             {
@@ -51,11 +74,17 @@ public static class ServiceCollectionExtensions
                 PostgresDatabase = GetEnvironmentOrThrow("POSTGRES_DB"),
                 PostgresUsername = GetEnvironmentOrThrow("POSTGRES_USER"),
                 PostgresPassword = GetEnvironmentOrThrow("POSTGRES_PASSWORD"),
-                BootstrapServers = GetEnvironmentOrThrow("BOOTSTRAP_SERVERS").Split("__"),
+                BootstrapServers = GetEnvironmentOrThrow("BOOTSTRAP_SERVERS")
+                    .Split("__"),
                 DrivingLicenseApprovedTopic = GetEnvironmentOrThrow("DRIVING_LICENSE_APPROVED_TOPIC"),
                 DrivingLicenseExpiredTopic = GetEnvironmentOrThrow("DRIVING_LICENCE_EXPIRED_TOPIC"),
                 VehicleAddedTopic = GetEnvironmentOrThrow("VEHICLE_ADDED_TOPIC"),
                 VehicleDeletedTopic = GetEnvironmentOrThrow("VEHICLE_DELETED_TOPIC"),
+                VehicleAddingProccessedTopic = GetEnvironmentOrThrow("VEHICLE_ADDING_PROCESSED_TOPIC"),
+                BookingCreatedTopic = GetEnvironmentOrThrow("BOOKING_CREATED_TOPIC"),
+                BookingCanceledTopic = GetEnvironmentOrThrow("BOOKING_CANCELED_TOPIC"),
+                ModelCreatedTopic = GetEnvironmentOrThrow("MODEL_CREATED_TOPIC"),
+                ModelCategoryUpdatedTopic = GetEnvironmentOrThrow("MODEL_CATEGORY_UPDATED_TOPIC"),
                 MongoConnectionString = GetEnvironmentOrThrow("MONGO_CONNECTION_STRING")
             },
             _ => throw new ArgumentException("Unknown environment")
@@ -106,42 +135,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterMediatorAndHandlers(this IServiceCollection services)
     {
-        // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        //
-        // // Commands
-        // services.AddTransient<IRequestHandler<AddOsagoCommand, Result>, AddOsagoHandler>();
-        // services.AddTransient<IRequestHandler<AddPtsToBookingCommand, Result>,
-        //     AddPtsToBookingHandler>();
-        // services.AddTransient<IRequestHandler<AddStsToBookingCommand, Result>,
-        //     AddStsToBookingHandler>();
-        // services.AddTransient<IRequestHandler<AddBookingCommand, Result>, AddBookingHandler>();
-        //
-        //
-        // // Queries
-        // var serviceProvider = services.BuildServiceProvider();
-        // services
-        //     .AddTransient<
-        //         IRequestHandler<GetBookingByVehicleIdQuery,
-        //             Result<GetBookingByVehicleIdQueryResponse>>, GetBookingByVehicleIdQueryHandler>();
-        // services
-        //     .AddTransient<IRequestHandler<GetStsByBookingIdQuery,
-        //         Result<GetStsByBookingIdQueryResponse>>>(_ =>
-        //         new GetStsByBookingIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
-        //             Configuration.AwsServiceUrl));
-        // services.AddTransient<IRequestHandler<GetPtsByBookingIdQuery,
-        //     Result<GetPtsByBookingIdQueryResponse>>>(_ =>
-        //     new GetPtsByBookingIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
-        //         Configuration.AwsServiceUrl));
-        // services.AddTransient<IRequestHandler<GetOsagoByBookingIdQuery,
-        //     Result<GetOsagoByBookingIdQueryResponse>>>(_ =>
-        //     new GetOsagoByBookingIdQueryHandler(serviceProvider.GetRequiredService<NpgsqlDataSource>(),
-        //         Configuration.AwsServiceUrl));
-        //
-        // // Domain event handlers
-        // services.AddTransient<INotificationHandler<OsagoAddedDomainEvent>, OsagoAddedHandler>();
-        // services.AddTransient<INotificationHandler<OsagoExpiredDomainEvent>, OsagoExpiredHandler>();
-        // services
-        //     .AddTransient<INotificationHandler<DocumentAddingCompletedDomainEvent>, DocumentAddingCompletedHandler>();
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(BookVehicleHandler).Assembly));
 
         return services;
     }
@@ -163,15 +157,17 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterRepositories(this IServiceCollection services)
     {
-        // services.AddTransient<IOsagoRepository, OsagoRepository>();
-        // services.AddTransient<IBookingRepository, BookingRepository>();
+        services.AddTransient<IBookingRepository, BookingRepository>();
+        services.AddTransient<ICustomerRepository, CustomerRepository>();
+        services.AddTransient<IVehicleModelRepository, VehicleModelRepository>();
+        services.AddTransient<IVehicleRepository, VehicleRepository>();
 
         return services;
     }
 
     public static IServiceCollection RegisterUnitOfWork(this IServiceCollection services)
     {
-        // services.AddTransient<IUnitOfWork, UnitOfWork>();
+        services.AddTransient<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
@@ -200,48 +196,146 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection RegisterMassTransit(this IServiceCollection services)
     {
-        // services.Configure<KafkaTopicsConfiguration>(config =>
-        // {
-        //     config.OsagoExpiredTopic = Configuration.OsagoExpiredTopic;
-        //     config.DocumentAddingCompletedTopic = Configuration.DocumentAddingCompletedTopic;
-        // });
-        //
-        // services.AddTransient<IMessageBus, KafkaProducer>();
-        //
-        // services.AddMassTransit(x =>
-        // {
-        //     x.UsingInMemory();
-        //
-        //     x.AddRider(rider =>
-        //     {
-        //         rider.AddConsumer<VehicleAddedConsumer>();
-        //
-        //         rider.AddProducer<string, OsagoExpired>(Configuration.OsagoExpiredTopic);
-        //         rider.AddProducer<string, DocumentAddingCompleted>(Configuration.DocumentAddingCompletedTopic);
-        //
-        //         rider.UsingKafka((context, k) =>
-        //         {
-        //             k.TopicEndpoint<VehicleAdded>(Configuration.VehicleAddedTopic,
-        //                 "vehicledocuments-consumer-group",
-        //                 e =>
-        //                 {
-        //                     e.EnableAutoOffsetStore = false;
-        //                     e.EnablePartitionEof = true;
-        //                     e.AutoOffsetReset = AutoOffsetReset.Earliest;
-        //                     e.CreateIfMissing();
-        //                     e.UseKillSwitch(cfg =>
-        //                         cfg.SetActivationThreshold(1)
-        //                             .SetRestartTimeout(TimeSpan.FromMinutes(1))
-        //                             .SetTripThreshold(0.05)
-        //                             .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
-        //                     e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
-        //                     e.ConfigureConsumer<VehicleAddedConsumer>(context);
-        //                 });
-        //
-        //             k.Host(Configuration.BootstrapServers);
-        //         });
-        //     });
-        // });
+        services.Configure<KafkaTopicsConfiguration>(config =>
+        {
+            config.VehicleAddedTopic = Configuration.VehicleAddedTopic;
+            config.VehicleDeletedTopic = Configuration.VehicleDeletedTopic;
+            config.VehicleAddingProccessedTopic = Configuration.VehicleAddingProccessedTopic;
+
+            config.BookingCreatedTopic = Configuration.BookingCreatedTopic;
+            config.BookingCanceledTopic = Configuration.BookingCanceledTopic;
+            
+            config.DrivingLicenseApprovedTopic = Configuration.DrivingLicenseApprovedTopic;
+            config.DrivingLicenseExpiredTopic = Configuration.DrivingLicenseExpiredTopic;
+        });
+        
+        services.AddTransient<IMessageBus, KafkaProducer>();
+        
+        services.AddMassTransit(x =>
+        {
+            x.UsingInMemory();
+        
+            x.AddRider(rider =>
+            {
+                rider.AddConsumer<VehicleAddedConsumer>();
+                rider.AddConsumer<VehicleDeletedConsumer>();
+                rider.AddConsumer<DrivingLicenseApprovedConsumer>();
+                rider.AddConsumer<DrivingLicenseExpiredConsumer>();
+                rider.AddConsumer<ModelCreatedConsumer>();
+                rider.AddConsumer<ModelCategoryUpdatedConsumer>();
+                
+                rider.AddProducer<string, BookingCreated>(Configuration.BookingCreatedTopic);
+                rider.AddProducer<string, BookingCanceled>(Configuration.BookingCanceledTopic);
+                rider.AddProducer<string, VehicleAddingToBookingProcessed>(Configuration.VehicleAddingProccessedTopic);
+        
+                rider.UsingKafka((context, k) =>
+                {
+                    k.TopicEndpoint<VehicleAdded>(Configuration.VehicleAddedTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<VehicleAddedConsumer>(context);
+                        });
+                    
+                    k.TopicEndpoint<VehicleDeleted>(Configuration.VehicleDeletedTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<VehicleDeletedConsumer>(context);
+                        });
+                    
+                    k.TopicEndpoint<DrivingLicenseApproved>(Configuration.DrivingLicenseApprovedTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<DrivingLicenseApprovedConsumer>(context);
+                        });
+                    
+                    k.TopicEndpoint<DrivingLicenseExpired>(Configuration.DrivingLicenseExpiredTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<DrivingLicenseExpiredConsumer>(context);
+                        });
+                    
+                    k.TopicEndpoint<ModelCreated>(Configuration.ModelCreatedTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<ModelCreatedConsumer>(context);
+                        });
+                    
+                    k.TopicEndpoint<ModelCategoryUpdated>(Configuration.ModelCategoryUpdatedTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<ModelCategoryUpdatedConsumer>(context);
+                        });
+        
+                    k.Host(Configuration.BootstrapServers);
+                });
+            });
+        });
 
         return services;
     }
@@ -295,8 +389,8 @@ public static class ServiceCollectionExtensions
                     .AddNpgsql()
                     .AddQuartzInstrumentation()
                     .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                        .AddService("Booking"))
-                    .AddSource("Booking")
+                        .AddService("BookingV1"))
+                    .AddSource("BookingV1")
                     .AddSource("MassTransit")
                     .AddJaegerExporter();
             });
@@ -351,6 +445,11 @@ internal class Configuration
     public required string DrivingLicenseApprovedTopic { get; init; }
     public required string VehicleAddedTopic { get; init; }
     public required string VehicleDeletedTopic { get; init; }
+    public required string VehicleAddingProccessedTopic { get; init; }
+    public required string ModelCreatedTopic { get; init; }
+    public required string ModelCategoryUpdatedTopic { get; init; }
+    public required string BookingCreatedTopic { get; init; }
+    public required string BookingCanceledTopic { get; init; }
 
 
     // Mongo

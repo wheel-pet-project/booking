@@ -3,6 +3,7 @@ using Domain.CustomerAggregate;
 using Domain.SharedKernel.Exceptions.ArgumentException;
 using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
 using Domain.SharedKernel.ValueObjects;
+using Domain.VehicleModelAggregate;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -12,6 +13,8 @@ namespace UnitTests.Domain.BookingAggregate;
 public class BookingShould
 {
     private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [ Category.Create(Category.BCategory) ]);
+    private readonly VehicleModel _vehicleModel =
+        VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
     private readonly Guid _vehicleId = Guid.NewGuid();
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     
@@ -21,7 +24,7 @@ public class BookingShould
         // Arrange
 
         // Act
-        var actual = Booking.Create( _customer, _vehicleId);
+        var actual = Booking.Create(_customer, _vehicleModel, _vehicleId);
 
         // Assert
         Assert.Equal(_customer.Id, actual.CustomerId);
@@ -34,24 +37,48 @@ public class BookingShould
     }
 
     [Fact]
+    public void AddDomainEventIfCreated()
+    {
+        // Arrange
+
+        // Act
+        var actual = Booking.Create(_customer, _vehicleModel, _vehicleId);
+
+        // Assert
+        Assert.NotEmpty(actual.DomainEvents);
+    }
+
+    [Fact]
     public void ThrowValueIsRequiredExceptionIfCustomerIsNull()
     {
         // Arrange
 
         // Act
-        void Act() => Booking.Create(null!, _vehicleId);
+        void Act() => Booking.Create(null!, _vehicleModel, _vehicleId);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
 
     [Fact]
+    public void ThrowValueIsRequiredExceptionIfVehicleModelIsNull()
+    {
+        // Arrange
+
+        // Act
+        void Act() => Booking.Create(_customer, null!, _vehicleId);
+
+        // Assert
+        Assert.Throws<ValueIsRequiredException>(Act);
+    }
+    
+    [Fact]
     public void ThrowValueIsRequiredExceptionIfVehicleIdIsEmpty()
     {
         // Arrange
         
         // Act
-        void Act() => Booking.Create(_customer, Guid.Empty);
+        void Act() => Booking.Create(_customer, _vehicleModel, Guid.Empty);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -61,7 +88,7 @@ public class BookingShould
     public void MarkAsNotBookedChangeStatus()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _vehicleId);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
 
         // Act
         booking.MarkAsNotBooked();
@@ -74,7 +101,7 @@ public class BookingShould
     public void MarkAsNotBookedThrowsDomainRuleViolationExceptionIfBookingCannotBeMarkedAsNotBooked()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _vehicleId);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
 
         // Act
@@ -88,7 +115,7 @@ public class BookingShould
     public void BookChangeStatus()
     {
         // Arrange
-        var booking = Booking.Create( _customer, _vehicleId);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
 
         // Act
         booking.Book(_timeProvider);
@@ -101,7 +128,7 @@ public class BookingShould
     public void BookSetStartProperty()
     {
         // Arrange
-        var booking = Booking.Create( _customer, _vehicleId);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
 
         // Act
         booking.Book(_timeProvider);
@@ -115,7 +142,7 @@ public class BookingShould
     public void BookThrowValueIsRequiredExceptionIfTimeProviderIsNull()
     {
         // Arrange
-        var booking = Booking.Create( _customer, _vehicleId);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
 
         // Act
         void Act() => booking.Book(null!);
@@ -128,7 +155,7 @@ public class BookingShould
     public void BookThrowDomainRulesViolationExceptionIfBookingCannotBeBooked()
     {
         // Arrange
-        var booking = Booking.Create( _customer, _vehicleId);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
         booking.Complete(_timeProvider);
 
@@ -143,7 +170,7 @@ public class BookingShould
     public void CompleteChangeStatus()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
 
         // Act
@@ -157,7 +184,7 @@ public class BookingShould
     public void CompleteSetEndProperty()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
         
         // Act
@@ -172,7 +199,7 @@ public class BookingShould
     public void CompleteValueIsRequiredExceptionIfTimeProviderIsNull()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
 
         // Act
         void Act() => booking.Complete(null!);
@@ -185,7 +212,7 @@ public class BookingShould
     public void CompleteThrowDomainRulesViolationExceptionIfBookingCannotBeCompleted()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
 
         // Act
         void Act() => booking.Complete(_timeProvider);
@@ -198,7 +225,7 @@ public class BookingShould
     public void CancelChangeStatus()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
 
         // Act
@@ -212,7 +239,7 @@ public class BookingShould
     public void CancelSetEndProperty()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
 
         // Act
@@ -227,7 +254,7 @@ public class BookingShould
     public void CancelValueIsRequiredExceptionIfTimeProviderIsNull()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
 
         // Act
@@ -241,7 +268,7 @@ public class BookingShould
     public void CancelThrowDomainRulesViolationExceptionIfBookingCannotBeCancelled()
     {
         // Arrange
-        var booking = Booking.Create(_customer, _customer.Id);
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
         booking.Complete(_timeProvider);
 

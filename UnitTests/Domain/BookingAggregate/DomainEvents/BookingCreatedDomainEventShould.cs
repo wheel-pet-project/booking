@@ -18,14 +18,27 @@ public class BookingCreatedDomainEventShould
         // Arrange
 
         // Act
-        var actual = new BookingCreatedDomainEvent(_vehicleId, _customerId);
+        var actual = new BookingCreatedDomainEvent(_bookingId, _vehicleId, _customerId);
 
         // Assert
         Assert.NotNull(actual);
+        Assert.Equal(_bookingId, actual.BookingId);
         Assert.Equal(_vehicleId, actual.VehicleId);
         Assert.Equal(_customerId, actual.CustomerId);
     }
 
+    [Fact]
+    public void ThrowDomainExceptionIfBookingIdIsEmpty()
+    {
+        // Arrange
+
+        // Act
+        void Act() => new BookingCreatedDomainEvent(Guid.Empty, _vehicleId, _customerId);
+
+        // Assert
+        Assert.Throws<ValueIsRequiredException>(Act);
+    }
+    
     [Fact]
     public void ThrowValueIsRequiredExceptionIfVehicleIdIsEmpty()
     {
@@ -34,7 +47,7 @@ public class BookingCreatedDomainEventShould
         // Act
         void Act()
         {
-            new BookingCreatedDomainEvent(Guid.Empty, _customerId);
+            new BookingCreatedDomainEvent(_bookingId, Guid.Empty, _customerId);
         }
 
         // Assert
@@ -49,7 +62,7 @@ public class BookingCreatedDomainEventShould
         // Act
         void Act()
         {
-            new BookingCreatedDomainEvent(_vehicleId, Guid.Empty);
+            new BookingCreatedDomainEvent(_bookingId, _vehicleId, Guid.Empty);
         }
 
         // Assert

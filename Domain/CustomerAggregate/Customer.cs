@@ -42,7 +42,7 @@ public sealed class Customer
     {
         if (vehicleModel == null) throw new ValueIsRequiredException($"{nameof(vehicleModel)} cannot be null");
 
-        return IsCanBooking && _categories.Contains(vehicleModel.Category);
+        return IsCanBooking && _categories.Exists(x => x == vehicleModel.Category);
     }
 
     public void AddTrip()

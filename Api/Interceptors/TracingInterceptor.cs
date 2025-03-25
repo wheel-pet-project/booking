@@ -6,7 +6,7 @@ namespace Api.Interceptors;
 
 public class TracingInterceptor : Interceptor
 {
-    private readonly ActivitySource _activitySource = new("Booking");
+    private readonly ActivitySource _activitySource = new("BookingV1");
 
     public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(
         TRequest request,

@@ -66,4 +66,18 @@ public class VehicleShould
         // Assert
         Assert.True(vehicle.IsDeleted);
     }
+    
+    
+
+    [Fact]
+    public void AddDomainEventIfCreated()
+    {
+        // Arrange
+
+        // Act
+        var actual = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+
+        // Assert
+        Assert.NotEmpty(actual.DomainEvents);
+    }
 }

@@ -1,9 +1,10 @@
+using Application.Ports.Postgres.Repositories;
 using Domain.CustomerAggregate;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Adapters.Postgres.Repositories;
 
-public class CustomerRepository(DataContext context)
+public class CustomerRepository(DataContext context) : ICustomerRepository
 {
     public async Task<Customer?> GetById(Guid id)
     {

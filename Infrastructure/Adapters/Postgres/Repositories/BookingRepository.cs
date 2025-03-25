@@ -1,9 +1,10 @@
+using Application.Ports.Postgres.Repositories;
 using Domain.BookingAggregate;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Adapters.Postgres.Repositories;
 
-public class BookingRepository(DataContext context)
+public class BookingRepository(DataContext context) : IBookingRepository
 {
     public async Task<Booking?> GetById(Guid id)
     {
@@ -14,11 +15,15 @@ public class BookingRepository(DataContext context)
 
     public async Task Add(Booking booking)
     {
+        context.Attach(booking.Status);
+        
         await context.Bookings.AddAsync(booking);
     }
 
     public void Update(Booking booking)
     {
+        context.Attach(booking.Status);
+        
         context.Bookings.Update(booking);
     }
 }

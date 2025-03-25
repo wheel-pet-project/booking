@@ -84,7 +84,7 @@ public class CustomerShould
     {
         // Arrange
         var customer = Customer.Create(_id, _categories);
-        var vehicleModel = VehicleModel.Create(Guid.NewGuid(), _categories[0]);
+        var vehicleModel = VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
     
         // Act
         var actual = customer.CanBookThisVehicleModel(vehicleModel);
@@ -98,7 +98,7 @@ public class CustomerShould
     {
         // Arrange
         var customer = Customer.Create(_id, _categories);
-        var vehicleModel = VehicleModel.Create(Guid.NewGuid(), _categories[0]);
+        var vehicleModel = VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
        
         customer.RevokeBookingRights();
     

@@ -21,10 +21,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Application\DomainEventHandlers\" />
         <Folder Include="Domain\SharedKernel\"/>
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\Domain\Domain.csproj"/>
     </ItemGroup>
 

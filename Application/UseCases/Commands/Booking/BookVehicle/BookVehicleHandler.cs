@@ -1,5 +1,6 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
+using Domain.SharedKernel.Errors;
 using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
 using FluentResults;
 using MediatR;
@@ -16,7 +17,7 @@ public class BookVehicleHandler(
     public async Task<Result> Handle(BookVehicleCommand request, CancellationToken cancellationToken)
     {
         var customer = await customerRepository.GetById(request.CustomerId);
-        if (customer == null) return Result.Fail("Customer not found or not loaded driving license");
+        if (customer == null) return Result.Fail(new NotFound("Customer not found or not loaded driving license"));
         
         var vehicle = await vehicleRepository.GetById(request.VehicleId);
         if (vehicle == null) throw new DataConsistencyViolationException(
@@ -25,7 +26,11 @@ public class BookVehicleHandler(
         var vehicleModel = await vehicleModelRepository.GetById(vehicle.VehicleModelId);
         if (vehicleModel == null) throw new DataConsistencyViolationException(
             "Vehicle model not found but vehicle include this model");
+
+        var booking = Domain.BookingAggregate.Booking.Create(customer, vehicleModel, vehicle.Id);
         
-        var booking = Domain.BookingAggregate.Booking.Create(customer, )
+        await bookingRepository.Add(booking);
+        
+        return await unitOfWork.Commit();
     }
 }

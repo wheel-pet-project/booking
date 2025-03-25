@@ -1,9 +1,11 @@
+using Domain.SharedKernel;
 using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.VehicleAggregate.DomainEvents;
 using Domain.VehicleModelAggregate;
 
 namespace Domain.VehicleAggregate;
 
-public sealed class Vehicle
+public sealed class Vehicle : Aggregate
 {
     private Vehicle()
     {
@@ -30,6 +32,10 @@ public sealed class Vehicle
         if (id == Guid.Empty) throw new ValueIsRequiredException($"{nameof(id)} cannot be empty");
         if (vehicleModel == null) throw new ValueIsRequiredException($"{nameof(vehicleModel)} cannot be null");
 
-        return new Vehicle(id, vehicleModel.Id);
+        var vehicle = new Vehicle(id, vehicleModel.Id);
+        
+        vehicle.AddDomainEvent(new VehicleAddedDomainEvent(vehicle.Id));
+        
+        return vehicle;
     }
 }

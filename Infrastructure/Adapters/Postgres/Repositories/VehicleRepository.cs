@@ -1,9 +1,10 @@
+using Application.Ports.Postgres.Repositories;
 using Domain.VehicleAggregate;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Adapters.Postgres.Repositories;
 
-public class VehicleRepository(DataContext context)
+public class VehicleRepository(DataContext context) : IVehicleRepository
 {
     public async Task<Vehicle?> GetById(Guid id)
     {
