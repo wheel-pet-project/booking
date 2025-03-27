@@ -4,9 +4,9 @@ import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "Api";
 
-package vehicledocuments.v1;
+package booking.v1;
 
-service VehicleDocuments {
+service Booking {
   rpc BookVehicle (BookVehicleRequest) returns (BookVehicleResponse);
   rpc CancelBookingVehicle (CancelBookingRequest) returns (CancelBookingResponse);
 }

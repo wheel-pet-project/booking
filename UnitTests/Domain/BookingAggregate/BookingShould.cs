@@ -5,6 +5,7 @@ using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
 using Domain.SharedKernel.ValueObjects;
 using Domain.VehicleModelAggregate;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Time.Testing;
 using Xunit;
 
 namespace UnitTests.Domain.BookingAggregate;
@@ -17,6 +18,7 @@ public class BookingShould
         VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
     private readonly Guid _vehicleId = Guid.NewGuid();
     private readonly TimeProvider _timeProvider = TimeProvider.System;
+    private readonly FakeTimeProvider _fakeTimeProvider = new();
     
     [Fact]
     public void CreateNewInstanceWithCorrectValues()
@@ -278,4 +280,91 @@ public class BookingShould
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);
     }
+
+    [Fact]
+    public void ExpireSetCanceledStatus()
+    {
+        // Arrange
+        _fakeTimeProvider.SetUtcNow(_timeProvider.GetUtcNow().AddDays(1));
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
+        booking.Book(_timeProvider);
+
+        // Act
+        booking.Expire(_fakeTimeProvider);
+
+        // Assert
+        Assert.Equal(Status.Canceled, booking.Status);
+    }
+    
+    [Fact]
+    public void ExpireSetEndProperty()
+    {
+        // Arrange
+        _fakeTimeProvider.SetUtcNow(_timeProvider.GetUtcNow().AddDays(1));
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
+        booking.Book(_timeProvider);
+
+        // Act
+        booking.Expire(_fakeTimeProvider);
+
+        // Assert
+        Assert.NotNull(booking.End);
+    }
+    
+    [Fact]
+    public void ExpireAddDomainEvent()
+    {
+        // Arrange
+        _fakeTimeProvider.SetUtcNow(_timeProvider.GetUtcNow().AddDays(1));
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
+        booking.Book(_timeProvider);
+        booking.ClearDomainEvents();
+
+        // Act
+        booking.Expire(_fakeTimeProvider);
+
+        // Assert
+        Assert.NotEmpty(booking.DomainEvents);
+    }
+    
+    [Fact]
+    public void ExpireThrowDomainRulesViolationExceptionIfBookingCannotBeExpired()
+    {
+        // Arrange
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
+
+        // Act
+        void Act() => booking.Expire(_timeProvider);
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
+    }
+
+    [Fact]
+    public void ExpireThrowValueIsRequiredExceptionIfTimeProviderIsNull()
+    {
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
+        booking.Book(_timeProvider);
+
+        // Act
+        void Act() => booking.Expire(null!);
+
+        // Assert
+        Assert.Throws<ValueIsRequiredException>(Act);
+    }
+
+    [Fact]
+    public void ExpireThrowDomainRulesViolationExceptionIfEndOfFreeWaitIsNotComeYet()
+    {
+        // Arrange
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
+        booking.Book(_timeProvider);
+
+        // Act
+        void Act() => booking.Expire(_timeProvider);
+
+        // Assert
+        Assert.Throws<DomainRulesViolationException>(Act);
+    }
+    
 }

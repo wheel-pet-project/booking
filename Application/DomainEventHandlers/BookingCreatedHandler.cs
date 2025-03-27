@@ -8,7 +8,6 @@ public class BookingCreatedHandler(IMessageBus messageBus) : INotificationHandle
 {
     public async Task Handle(BookingCreatedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
-        throw new System.NotImplementedException();
-        // await messageBus.Publish(domainEvent, cancellationToken);
+        await messageBus.Publish(domainEvent, cancellationToken);
     }
 }

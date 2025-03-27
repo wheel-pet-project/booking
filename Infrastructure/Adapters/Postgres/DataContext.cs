@@ -93,6 +93,8 @@ internal class VehicleEntityTypeConfiguration : IEntityTypeConfiguration<Vehicle
         builder.Property(x => x.Id).ValueGeneratedNever().HasColumnName("id");
         builder.Property(x => x.VehicleModelId).ValueGeneratedNever().HasColumnName("vehicle_model_id").IsRequired();
         builder.Property(x => x.IsDeleted).HasColumnName("is_deleted").IsRequired();
+
+        builder.Ignore(x => x.DomainEvents);
     }
 }
 

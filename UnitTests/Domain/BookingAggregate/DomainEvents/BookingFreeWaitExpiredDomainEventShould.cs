@@ -9,8 +9,6 @@ namespace UnitTests.Domain.BookingAggregate.DomainEvents;
 public class BookingFreeWaitExpiredDomainEventShould
 {
     private readonly Guid _bookingId = Guid.NewGuid();
-    private readonly Guid _vehicleId = Guid.NewGuid();
-    private readonly Guid _customerId = Guid.NewGuid();
 
     [Fact]
     public void CreateNewInstanceWithCorrectValues()
@@ -18,13 +16,11 @@ public class BookingFreeWaitExpiredDomainEventShould
         // Arrange
 
         // Act
-        var actual = new BookingFreeWaitExpiredDomainEvent(_bookingId, _vehicleId, _customerId);
+        var actual = new BookingFreeWaitExpiredDomainEvent(_bookingId);
 
         // Assert
         Assert.NotNull(actual);
         Assert.Equal(_bookingId, actual.BookingId);
-        Assert.Equal(_vehicleId, actual.VehicleId);
-        Assert.Equal(_customerId, actual.CustomerId);
     }
 
     [Fact]
@@ -35,37 +31,7 @@ public class BookingFreeWaitExpiredDomainEventShould
         // Act
         void Act()
         {
-            new BookingFreeWaitExpiredDomainEvent(Guid.Empty, _vehicleId, _customerId);
-        }
-
-        // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
-    }
-
-    [Fact]
-    public void ThrowValueIsRequiredExceptionIfVehicleIdIsEmpty()
-    {
-        // Arrange
-
-        // Act
-        void Act()
-        {
-            new BookingFreeWaitExpiredDomainEvent(_bookingId, Guid.Empty, _customerId);
-        }
-
-        // Assert
-        Assert.Throws<ValueIsRequiredException>(Act);
-    }
-
-    [Fact]
-    public void ThrowValueIsRequiredExceptionIfCustomerIdIsEmpty()
-    {
-        // Arrange
-
-        // Act
-        void Act()
-        {
-            new BookingFreeWaitExpiredDomainEvent(_bookingId, _vehicleId, Guid.Empty);
+            new BookingFreeWaitExpiredDomainEvent(Guid.Empty);
         }
 
         // Assert

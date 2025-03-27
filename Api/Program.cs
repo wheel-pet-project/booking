@@ -18,7 +18,17 @@ public class Program
 
         // Extensions
         services
-            .RegisterPostgresContextAndDataSource();
+            .RegisterPostgresContextAndDataSource()
+            .RegisterMediatorAndHandlers()
+            .RegisterInboxAndOutboxBackgroundJobs()
+            .RegisterSerilog()
+            .RegisterRepositories()
+            .RegisterUnitOfWork()
+            .RegisterInbox()
+            .RegisterMassTransit()
+            .RegisterTelemetry()
+            .RegisterHealthCheckV1()
+            .RegisterTimeProvider();;
 
         var app = builder.Build();
 

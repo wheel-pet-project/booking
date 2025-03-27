@@ -48,7 +48,7 @@ public sealed class Booking : Aggregate
         
         Status = Status.Booked;
         
-        Start = timeProvider.GetUtcNow().DateTime;
+        Start = timeProvider.GetUtcNow().UtcDateTime;
     }
     
     public void Complete(TimeProvider timeProvider)
@@ -60,7 +60,7 @@ public sealed class Booking : Aggregate
 
         Status = Status.Completed;
 
-        End = timeProvider.GetUtcNow().DateTime;
+        End = timeProvider.GetUtcNow().UtcDateTime;
     }
 
     public void Cancel(TimeProvider timeProvider)
@@ -72,7 +72,29 @@ public sealed class Booking : Aggregate
 
         Status = Status.Canceled;
 
-        End = timeProvider.GetUtcNow().DateTime;
+        End = timeProvider.GetUtcNow().UtcDateTime;
+        
+        AddDomainEvent(new BookingCanceledDomainEvent(Id, VehicleId, CustomerId));
+    }
+
+    public void Expire(TimeProvider timeProvider)
+    {
+        if (timeProvider == null) throw new ValueIsRequiredException($"{nameof(timeProvider)} cannot be null");
+        
+        if (Status.CanBeChangedToThisStatus(Status.Canceled) == false)
+            throw new DomainRulesViolationException("Booking cannot be expired");
+
+        if (Start == null)
+            throw new DomainRulesViolationException(
+                "Booking start time is null, because booking is not started free-wait");
+        
+        if (timeProvider.GetUtcNow().UtcDateTime < Start.Value.Add(FreeWait.Duration.ToTimeSpan()))
+            throw new DomainRulesViolationException(
+                "End of free-wait is not come yet, booking cannot be expired because");
+        
+        Status = Status.Canceled;
+        
+        End = timeProvider.GetUtcNow().UtcDateTime;
         
         AddDomainEvent(new BookingCanceledDomainEvent(Id, VehicleId, CustomerId));
     }

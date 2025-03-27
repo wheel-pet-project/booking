@@ -1,4 +1,3 @@
-using Application.UseCases.Commands.Customer.AddCustomerOrEnableBookingRights;
 using Application.UseCases.Commands.Customer.RevokeCustomerBookingRights;
 using FluentResults;
 using MediatR;

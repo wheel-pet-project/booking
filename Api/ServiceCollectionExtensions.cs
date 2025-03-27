@@ -10,6 +10,7 @@ using From.VehicleFleetKafkaEvents.Model;
 using From.VehicleFleetKafkaEvents.Vehicle;
 using Infrastructure.Adapters.Kafka;
 using Infrastructure.Adapters.Postgres;
+using Infrastructure.Adapters.Postgres.FreeWaitExpirationObserver;
 using Infrastructure.Adapters.Postgres.Inbox;
 using Infrastructure.Adapters.Postgres.Outbox;
 using Infrastructure.Adapters.Postgres.Repositories;
@@ -40,8 +41,8 @@ public static class ServiceCollectionExtensions
             {
                 ApplicationName = "Vehicle_documents#" + Environment.MachineName,
                 PostgresHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost",
-                PostgresPort = int.Parse(Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5450"),
-                PostgresDatabase = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "vehicledocuments_db",
+                PostgresPort = int.Parse(Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5460"),
+                PostgresDatabase = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "booking_db",
                 PostgresUsername = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "postgres",
                 PostgresPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password",
                 BootstrapServers = (Environment.GetEnvironmentVariable("BOOTSTRAP_SERVERS") ??
@@ -179,14 +180,6 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection RegisterEnumMappers(this IServiceCollection services)
-    {
-        // services.AddScoped<ColorMapper>();
-        // services.AddScoped<ExpiryStatusMapper>();
-
-        return services;
-    }
-
     public static IServiceCollection RegisterTimeProvider(this IServiceCollection services)
     {
         services.AddSingleton<TimeProvider>(TimeProvider.System);
@@ -200,7 +193,7 @@ public static class ServiceCollectionExtensions
         {
             config.VehicleAddedTopic = Configuration.VehicleAddedTopic;
             config.VehicleDeletedTopic = Configuration.VehicleDeletedTopic;
-            config.VehicleAddingProccessedTopic = Configuration.VehicleAddingProccessedTopic;
+            config.VehicleAddingToBookingProccessedTopic = Configuration.VehicleAddingProccessedTopic;
 
             config.BookingCreatedTopic = Configuration.BookingCreatedTopic;
             config.BookingCanceledTopic = Configuration.BookingCanceledTopic;
@@ -355,6 +348,12 @@ public static class ServiceCollectionExtensions
                 .AddJob<InboxBackgroundJob>(j => j.WithIdentity(inboxJobKey))
                 .AddTrigger(trigger => trigger.ForJob(inboxJobKey)
                     .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInSeconds(3).RepeatForever()));
+
+            var freeWaitExpirationObserverJobKey = new JobKey(nameof(FreeWaitExpirationObserverBackgroundJob));
+            configure
+                .AddJob<FreeWaitExpirationObserverBackgroundJob>(j => j.WithIdentity(freeWaitExpirationObserverJobKey))
+                .AddTrigger(trigger => trigger.ForJob(freeWaitExpirationObserverJobKey)
+                    .WithSimpleSchedule(scheduleBuilder => scheduleBuilder.WithIntervalInSeconds(10).RepeatForever()));
         });
 
         services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);

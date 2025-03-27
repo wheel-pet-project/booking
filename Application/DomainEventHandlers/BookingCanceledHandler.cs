@@ -6,8 +6,8 @@ namespace Application.DomainEventHandlers;
 
 public class BookingCanceledHandler(IMessageBus messageBus) : INotificationHandler<BookingCanceledDomainEvent>
 {
-    public Task Handle(BookingCanceledDomainEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(BookingCanceledDomainEvent domainEvent, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await messageBus.Publish(domainEvent, cancellationToken);
     }
 }

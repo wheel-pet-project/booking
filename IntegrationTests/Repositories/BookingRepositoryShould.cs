@@ -33,9 +33,9 @@ public class BookingRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
-        var modelFromDb = await repository.GetById(booking.Id);
-        Assert.NotNull(modelFromDb);
-        Assert.Equivalent(booking, modelFromDb);
+        var bookingFromDb = await repository.GetById(booking.Id);
+        Assert.NotNull(bookingFromDb);
+        Assert.Equivalent(booking, bookingFromDb);
     }
 
     [Fact]
@@ -56,16 +56,16 @@ public class BookingRepositoryShould : IntegrationTestBase
 
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
         
-        _customer.AddTrip();
+        booking.Book(TimeProvider.System);
 
         // Act
         repository.Update(booking);
         await uow.Commit();
 
         // Assert
-        var modelFromDb = await repository.GetById(booking.Id);
-        Assert.NotNull(modelFromDb);
-        Assert.Equivalent(booking, modelFromDb);
+        var bookingFromDb = await repository.GetById(booking.Id);
+        Assert.NotNull(bookingFromDb);
+        Assert.Equivalent(booking, bookingFromDb);
     }
 
     [Fact]

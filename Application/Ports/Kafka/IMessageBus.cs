@@ -5,11 +5,9 @@ namespace Application.Ports.Kafka;
 
 public interface IMessageBus
 {
-    Task Publish(BookingCanceledDomainEvent domainEvent);
+    Task Publish(BookingCanceledDomainEvent domainEvent, CancellationToken cancellationToken);
     
-    Task Publish(BookingCreatedDomainEvent domainEvent);
+    Task Publish(BookingCreatedDomainEvent domainEvent, CancellationToken cancellationToken);
     
-    Task Publish(BookingFreeWaitExpiredDomainEvent domainEvent);
-    
-    Task Publish(VehicleAddedDomainEvent domainEvent);
+    Task Publish(VehicleAddedDomainEvent domainEvent, CancellationToken cancellationToken);
 }
