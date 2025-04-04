@@ -1,5 +1,6 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
+using Domain.SharedKernel.Errors;
 using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
 using FluentResults;
 using MediatR;
@@ -13,8 +14,7 @@ public class EnableCustomerBookingRightsHandler(
     public async Task<Result> Handle(EnableCustomerBookingRightsCommand request, CancellationToken cancellationToken)
     {
         var customer = await customerRepository.GetById(request.CustomerId);
-        if (customer == null) throw new DataConsistencyViolationException(
-                $"Customer with id: {request.CustomerId} not found for enabling customer booking rights");
+        if (customer == null) return Result.Fail(new NotFound("Customer with this id not found"));
         
         customer.EnableBookingRights();
         

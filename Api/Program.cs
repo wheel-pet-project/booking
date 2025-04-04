@@ -1,3 +1,4 @@
+using Api.Adapters.Grpc;
 using Api.Interceptors;
 
 namespace Api;
@@ -32,7 +33,8 @@ public class Program
 
         var app = builder.Build();
 
-        // app.MapGrpcService<GreeterService>();
+        app.MapGrpcService<BookingV1>();
+        app.MapGrpcHealthChecksService();
 
         app.Run();
     }

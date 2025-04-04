@@ -45,17 +45,17 @@ public class EnableCustomerBookingRightsHandlerShould
     }
 
     [Fact]
-    public async Task ThrowDataConsistencyViolationExceptionIfCustomerNotFound()
+    public async Task ReturnNotFoundErrorIfCustomerNotFound()
     {
         // Arrange
         _customerRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>()))
             .ReturnsAsync(null as global::Domain.CustomerAggregate.Customer);
 
         // Act
-        async Task Act() => await _handler.Handle(_command, TestContext.Current.CancellationToken);
+        var actual = await _handler.Handle(_command, TestContext.Current.CancellationToken);
 
         // Assert
-        await Assert.ThrowsAsync<DataConsistencyViolationException>(Act);
+        Assert.True(actual.Errors.Exists(x => x is NotFound));
     }
 
     [Fact]

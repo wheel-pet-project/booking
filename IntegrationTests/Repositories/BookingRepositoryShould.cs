@@ -33,6 +33,7 @@ public class BookingRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
+        Context.ChangeTracker.Clear();
         var bookingFromDb = await repository.GetById(booking.Id);
         Assert.NotNull(bookingFromDb);
         Assert.Equivalent(booking, bookingFromDb);
@@ -63,6 +64,7 @@ public class BookingRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
+        Context.ChangeTracker.Clear();
         var bookingFromDb = await repository.GetById(booking.Id);
         Assert.NotNull(bookingFromDb);
         Assert.Equivalent(booking, bookingFromDb);
@@ -83,6 +85,8 @@ public class BookingRepositoryShould : IntegrationTestBase
 
         await repository.Add(booking);
         await uow.Commit();
+        
+        Context.ChangeTracker.Clear();
 
         // Act
         var actual = await repository.GetById(booking.Id);

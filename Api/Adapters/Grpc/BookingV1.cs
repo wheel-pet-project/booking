@@ -17,7 +17,7 @@ public class BookingV1(IMediator mediator) : Booking.BookingBase
             ParseGuidOrThrow(request.CustomerId)));
 
         return response.IsSuccess
-            ? new BookVehicleResponse()
+            ? new BookVehicleResponse { BookingId = response.Value.BookingId.ToString()}
             : ParseErrorToRpcException<BookVehicleResponse>(response.Errors);
     }
 

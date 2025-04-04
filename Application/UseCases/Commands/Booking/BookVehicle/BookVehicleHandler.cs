@@ -12,14 +12,14 @@ public class BookVehicleHandler(
     IVehicleRepository vehicleRepository,
     IVehicleModelRepository vehicleModelRepository,
     ICustomerRepository customerRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<BookVehicleCommand, Result>
+    IUnitOfWork unitOfWork) : IRequestHandler<BookVehicleCommand, Result<BookVehicleResponse>>
 {
-    public async Task<Result> Handle(BookVehicleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<BookVehicleResponse>> Handle(BookVehicleCommand request, CancellationToken _)
     {
         var customer = await customerRepository.GetById(request.CustomerId);
-        if (customer == null) return Result.Fail(new NotFound("Customer not found or not loaded driving license"));
-        
         var vehicle = await vehicleRepository.GetById(request.VehicleId);
+        
+        if (customer == null) return Result.Fail(new NotFound("Customer not found or not loaded driving license"));
         if (vehicle == null) throw new DataConsistencyViolationException(
             $"Vehicle with {request.VehicleId} not found for booking");
 
@@ -31,6 +31,10 @@ public class BookVehicleHandler(
         
         await bookingRepository.Add(booking);
         
-        return await unitOfWork.Commit();
+        var commitResult = await unitOfWork.Commit();
+        
+        return commitResult.IsSuccess
+            ? new BookVehicleResponse(booking.Id)
+            : Result.Fail(commitResult.Errors);
     }
 }

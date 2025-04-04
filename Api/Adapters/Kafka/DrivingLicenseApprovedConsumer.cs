@@ -17,7 +17,7 @@ public class DrivingLicenseApprovedConsumer(
         var drivingLicenseApprovedConsumerEvent = new DrivingLicenseApprovedConsumerEvent(
             @event.EventId,
             @event.AccountId,
-            @event.Categories.ToList());
+            @event.Categories.Select(x => x[0]).ToList());
         
         var isSaved = await inbox.Save(drivingLicenseApprovedConsumerEvent);
         if (isSaved == false) throw new ConsumerCanceledException("Could not save event in inbox");

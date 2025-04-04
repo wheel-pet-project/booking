@@ -6,8 +6,6 @@ namespace Domain.CustomerAggregate;
 
 public sealed class Customer
 {
-    private readonly List<Category> _categories = [];
-
     private Customer()
     {
     }
@@ -22,7 +20,7 @@ public sealed class Customer
         CanceledBookings = 0;
     }
 
-
+    private readonly List<Category> _categories = [];
     public Guid Id { get; private set; }
     public Level Level { get; private set; } = null!;
     public LoyaltyPoints Points => LoyaltyPoints.CreateFromTrips(Trips, CanceledBookings);

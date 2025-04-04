@@ -32,10 +32,10 @@ public class UnitOfWorkShould : IntegrationTestBase
         var uowBuilder = new UnitOfWorkBuilder();
         var uow = uowBuilder.Build(Context);
 
-        // Act
         await Context.VehicleModels.AddAsync(_vehicleModel, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
-
+        
+        // Act
         await Context.AddAsync(vehicle, TestContext.Current.CancellationToken);
         await uow.Commit();
 

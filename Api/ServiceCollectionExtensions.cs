@@ -49,12 +49,12 @@ public static class ServiceCollectionExtensions
                                     "localhost:9092").Split("__"),
                 DrivingLicenseApprovedTopic = Environment.GetEnvironmentVariable("DRIVING_LICENSE_APPROVED_TOPIC") ??
                                               "driving-license-approved-topic",
-                DrivingLicenseExpiredTopic = Environment.GetEnvironmentVariable("DRIVING_LICENCE_EXPIRED_TOPIC") ??
+                DrivingLicenseExpiredTopic = Environment.GetEnvironmentVariable("DRIVING_LICENSE_EXPIRED_TOPIC") ??
                                              "driving-license-expired-topic",
                 VehicleAddedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDED_TOPIC") ?? "vehicle-added-topic",
                 VehicleDeletedTopic = Environment.GetEnvironmentVariable("VEHICLE_DELETED_TOPIC") ??
                                       "vehicle-deleted-topic",
-                VehicleAddingProccessedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDING_PROCESSED_TOPIC") ??
+                VehicleAddingProccessedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC") ??
                                                "vehicle-adding-proccessed-topic",
                 BookingCreatedTopic = Environment.GetEnvironmentVariable("BOOKING_CREATED_TOPIC") ??
                                       "booking-created-topic",
@@ -78,10 +78,10 @@ public static class ServiceCollectionExtensions
                 BootstrapServers = GetEnvironmentOrThrow("BOOTSTRAP_SERVERS")
                     .Split("__"),
                 DrivingLicenseApprovedTopic = GetEnvironmentOrThrow("DRIVING_LICENSE_APPROVED_TOPIC"),
-                DrivingLicenseExpiredTopic = GetEnvironmentOrThrow("DRIVING_LICENCE_EXPIRED_TOPIC"),
+                DrivingLicenseExpiredTopic = GetEnvironmentOrThrow("DRIVING_LICENSE_EXPIRED_TOPIC"),
                 VehicleAddedTopic = GetEnvironmentOrThrow("VEHICLE_ADDED_TOPIC"),
                 VehicleDeletedTopic = GetEnvironmentOrThrow("VEHICLE_DELETED_TOPIC"),
-                VehicleAddingProccessedTopic = GetEnvironmentOrThrow("VEHICLE_ADDING_PROCESSED_TOPIC"),
+                VehicleAddingProccessedTopic = GetEnvironmentOrThrow("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC"),
                 BookingCreatedTopic = GetEnvironmentOrThrow("BOOKING_CREATED_TOPIC"),
                 BookingCanceledTopic = GetEnvironmentOrThrow("BOOKING_CANCELED_TOPIC"),
                 ModelCreatedTopic = GetEnvironmentOrThrow("MODEL_CREATED_TOPIC"),
@@ -388,8 +388,8 @@ public static class ServiceCollectionExtensions
                     .AddNpgsql()
                     .AddQuartzInstrumentation()
                     .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                        .AddService("BookingV1"))
-                    .AddSource("BookingV1")
+                        .AddService("Booking"))
+                    .AddSource("Booking")
                     .AddSource("MassTransit")
                     .AddJaegerExporter();
             });

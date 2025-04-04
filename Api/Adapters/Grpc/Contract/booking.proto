@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
-
 option csharp_namespace = "Api";
 
 package booking.v1;
@@ -15,7 +13,9 @@ message BookVehicleRequest{
   string vehicle_id = 1;
   string customer_id = 2;
 }
-message BookVehicleResponse{}
+message BookVehicleResponse{
+  string booking_id = 1;
+}
 
 
 message CancelBookingRequest{

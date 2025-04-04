@@ -22,6 +22,7 @@ public class CustomerRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
+        Context.ChangeTracker.Clear();
         var modelFromDb = await repository.GetById(_customer.Id);
         Assert.NotNull(modelFromDb);
         Assert.Equivalent(_customer, modelFromDb);
@@ -46,6 +47,7 @@ public class CustomerRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
+        Context.ChangeTracker.Clear();
         var modelFromDb = await repository.GetById(_customer.Id);
         Assert.NotNull(modelFromDb);
         Assert.Equivalent(_customer, modelFromDb);
@@ -60,6 +62,7 @@ public class CustomerRepositoryShould : IntegrationTestBase
 
         await repository.Add(_customer);
         await uow.Commit();
+        Context.ChangeTracker.Clear();
 
         // Act
         var actual = await repository.GetById(_customer.Id);

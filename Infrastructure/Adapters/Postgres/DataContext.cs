@@ -51,7 +51,7 @@ internal class CustomerEntityTypeConfiguration : IEntityTypeConfiguration<Custom
         builder.Property(x => x.Categories)
             .HasField("_categories")
             .HasConversion<char[]>(x => x.Select(to => to.Character).ToArray(),
-                from => from.Select(Category.Create).ToArray())
+                from => from.Select(Category.Create).ToList())
             .HasColumnName("categories");
         
         builder.Ignore(x => x.Points);

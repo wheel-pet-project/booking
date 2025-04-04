@@ -29,6 +29,7 @@ public class VehicleRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
+        Context.ChangeTracker.Clear();
         var vehicleFromDb = await repository.GetById(vehicle.Id);
         Assert.NotNull(vehicleFromDb);
         Assert.Equivalent(vehicle, vehicleFromDb);
@@ -57,6 +58,7 @@ public class VehicleRepositoryShould : IntegrationTestBase
         await uow.Commit();
 
         // Assert
+        Context.ChangeTracker.Clear();
         var vehicleFromDb = await repository.GetById(vehicle.Id);
         Assert.NotNull(vehicleFromDb);
         Assert.Equivalent(vehicle, vehicleFromDb);
@@ -76,6 +78,8 @@ public class VehicleRepositoryShould : IntegrationTestBase
 
         await repository.Add(vehicle);
         await uow.Commit();
+        
+        Context.ChangeTracker.Clear();
 
         // Act
         var actual = await repository.GetById(vehicle.Id);
