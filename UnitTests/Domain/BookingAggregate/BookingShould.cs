@@ -196,6 +196,21 @@ public class BookingShould
         Assert.NotNull(booking.End);
         Assert.NotEqual(default, booking.End.Value);
     }
+    
+    [Fact]
+    public void CompleteAddDomainEvent()
+    {
+        // Arrange
+        var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
+        booking.Book(_timeProvider);
+        booking.ClearDomainEvents();
+        
+        // Act
+        booking.Complete(_timeProvider);
+
+        // Assert
+        Assert.NotEmpty(booking.DomainEvents);
+    }
 
     [Fact]
     public void CompleteValueIsRequiredExceptionIfTimeProviderIsNull()

@@ -59,6 +59,8 @@ public sealed class Booking : Aggregate
             "Booking cannot be completed");
 
         Status = Status.Completed;
+        
+        AddDomainEvent(new BookingCompletedDomainEvent(Id, VehicleId, CustomerId));
 
         End = timeProvider.GetUtcNow().UtcDateTime;
     }

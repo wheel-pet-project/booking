@@ -6,6 +6,7 @@ using Application.UseCases.Commands.Booking.BookVehicle;
 using Confluent.Kafka;
 using From.BookingKafkaEvents;
 using From.DrivingLicenseKafkaEvents;
+using From.VehicleCheckKafkaEvents;
 using From.VehicleFleetKafkaEvents.Model;
 using From.VehicleFleetKafkaEvents.Vehicle;
 using Infrastructure.Adapters.Kafka;
@@ -64,6 +65,8 @@ public static class ServiceCollectionExtensions
                 "model-created-topic",
                 ModelCategoryUpdatedTopic = Environment.GetEnvironmentVariable("MODEL_CATEGORY_UPDATED_TOPIC") ??
                                             "model-category-updated-topic",
+                VehicleCheckingStartedTopic = Environment.GetEnvironmentVariable("VEHICLE_CHECKING_STARTED_TOPIC") ??
+                                              "vehicle-checking-started-topic",
                 MongoConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING") ??
                                         "mongodb://carsharing:password@localhost:27017/drivinglicense?authSource=admin",
             },
@@ -86,6 +89,7 @@ public static class ServiceCollectionExtensions
                 BookingCanceledTopic = GetEnvironmentOrThrow("BOOKING_CANCELED_TOPIC"),
                 ModelCreatedTopic = GetEnvironmentOrThrow("MODEL_CREATED_TOPIC"),
                 ModelCategoryUpdatedTopic = GetEnvironmentOrThrow("MODEL_CATEGORY_UPDATED_TOPIC"),
+                VehicleCheckingStartedTopic = GetEnvironmentOrThrow("VEHICLE_CHECKING_STARTED_TOPIC"),
                 MongoConnectionString = GetEnvironmentOrThrow("MONGO_CONNECTION_STRING")
             },
             _ => throw new ArgumentException("Unknown environment")
@@ -216,6 +220,7 @@ public static class ServiceCollectionExtensions
                 rider.AddConsumer<DrivingLicenseExpiredConsumer>();
                 rider.AddConsumer<ModelCreatedConsumer>();
                 rider.AddConsumer<ModelCategoryUpdatedConsumer>();
+                rider.AddConsumer<VehicleCheckingStartedConsumer>();
                 
                 rider.AddProducer<string, BookingCreated>(Configuration.BookingCreatedTopic);
                 rider.AddProducer<string, BookingCanceled>(Configuration.BookingCanceledTopic);
@@ -323,6 +328,23 @@ public static class ServiceCollectionExtensions
                                     .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
                             e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
                             e.ConfigureConsumer<ModelCategoryUpdatedConsumer>(context);
+                        });
+                    
+                    k.TopicEndpoint<VehicleCheckingStarted>(Configuration.VehicleCheckingStartedTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<VehicleCheckingStartedConsumer>(context);
                         });
         
                     k.Host(Configuration.BootstrapServers);
@@ -449,6 +471,7 @@ internal class Configuration
     public required string ModelCategoryUpdatedTopic { get; init; }
     public required string BookingCreatedTopic { get; init; }
     public required string BookingCanceledTopic { get; init; }
+    public required string VehicleCheckingStartedTopic { get; init; }
 
 
     // Mongo

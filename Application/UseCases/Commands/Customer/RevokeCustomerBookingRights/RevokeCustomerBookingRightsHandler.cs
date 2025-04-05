@@ -1,7 +1,6 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
 using Domain.SharedKernel.Errors;
-using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
 using FluentResults;
 using MediatR;
 

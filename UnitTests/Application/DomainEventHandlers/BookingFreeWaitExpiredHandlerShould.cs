@@ -1,5 +1,4 @@
 using Application.DomainEventHandlers;
-using Application.Ports.Kafka;
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
 using Domain.BookingAggregate;

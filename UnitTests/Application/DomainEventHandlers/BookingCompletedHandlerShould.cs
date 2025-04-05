@@ -1,5 +1,4 @@
 using Application.DomainEventHandlers;
-using Application.Ports.Kafka;
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
 using Domain.BookingAggregate.DomainEvents;
@@ -15,26 +14,24 @@ using Xunit;
 
 namespace UnitTests.Application.DomainEventHandlers;
 
-[TestSubject(typeof(BookingCanceledHandler))]
-public class BookingCanceledHandlerShould
+[TestSubject(typeof(BookingCompletedHandler))]
+public class BookingCompletedHandlerShould
 {
     private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]);
     
     private readonly Mock<ICustomerRepository> _customerRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
-    private readonly Mock<IMessageBus> _messageBusMock = new();
 
-    private readonly BookingCanceledDomainEvent _event = new(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+    private readonly BookingCompletedDomainEvent _event = new(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
     
-    private readonly BookingCanceledHandler _handler;
+    private readonly BookingCompletedHandler _handler;
 
-    public BookingCanceledHandlerShould()
+    public BookingCompletedHandlerShould()
     {
         _customerRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(_customer);
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Ok);
 
-        _handler = new BookingCanceledHandler(_customerRepositoryMock.Object, _unitOfWorkMock.Object,
-            _messageBusMock.Object);
+        _handler = new BookingCompletedHandler(_customerRepositoryMock.Object, _unitOfWorkMock.Object);
     }
     
     [Fact]
@@ -48,20 +45,6 @@ public class BookingCanceledHandlerShould
 
         // Assert
         await Assert.ThrowsAsync<DataConsistencyViolationException>(Act);
-    }
-    
-    [Fact]
-    public async Task CallMessageBusPublish()
-    {
-        // Arrange
-
-        // Act
-        await _handler.Handle(_event, TestContext.Current.CancellationToken);
-
-        // Assert
-        _messageBusMock.Verify(
-            x => x.Publish(It.IsAny<BookingCanceledDomainEvent>(), It.IsAny<CancellationToken>()),
-            Times.Once);
     }
 
     [Fact]
