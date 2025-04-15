@@ -3,6 +3,6 @@ using MediatR;
 
 namespace Application.UseCases.Commands.Customer.AddCustomerOrEnableBookingRights;
 
-public record AddCustomerOrEnableBookingCommand(
+public record AddCustomerOrEnableBookingRightsCommand(
     Guid CustomerId, 
     List<char> Categories) : IRequest<Result>;

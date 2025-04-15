@@ -1,6 +1,7 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
 using Application.UseCases.Commands.Booking.CompleteBooking;
+using Application.UseCases.Commands.Booking.ProcessOccupationOfVehicle;
 using Domain.SharedKernel.Errors;
 using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
 using Domain.SharedKernel.ValueObjects;
@@ -11,8 +12,8 @@ using Xunit;
 
 namespace UnitTests.Application.UseCases.Commands.Booking;
 
-[TestSubject(typeof(CompleteBookingHandler))]
-public class CompleteBookingHandlerShould
+[TestSubject(typeof(ProcessOccupationOfVehicleHandler))]
+public class ProcessOccupationOfVehicleHandlerShould
 {
     private readonly global::Domain.BookingAggregate.Booking _booking = global::Domain.BookingAggregate.Booking.Create(
         global::Domain.CustomerAggregate.Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]),
@@ -22,18 +23,16 @@ public class CompleteBookingHandlerShould
     private Mock<IBookingRepository> _bookingRepositoryMock = new();
     private Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-    private readonly CompleteBookingCommand _command = new CompleteBookingCommand(Guid.NewGuid());
+    private readonly ProcessOccupationOfVehicleCommand _command = new (Guid.NewGuid(), true);
     
-    private CompleteBookingHandler _handler;
+    private ProcessOccupationOfVehicleHandler _handler;
 
-    public CompleteBookingHandlerShould()
+    public ProcessOccupationOfVehicleHandlerShould()
     {
-        _booking.Book(TimeProvider.System);
-        
         _bookingRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(_booking);
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Ok);
 
-        _handler = new CompleteBookingHandler(_bookingRepositoryMock.Object, _unitOfWorkMock.Object,
+        _handler = new ProcessOccupationOfVehicleHandler(_bookingRepositoryMock.Object, _unitOfWorkMock.Object,
             TimeProvider.System);
     }
 

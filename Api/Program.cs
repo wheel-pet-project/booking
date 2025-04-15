@@ -21,15 +21,15 @@ public class Program
         services
             .RegisterPostgresContextAndDataSource()
             .RegisterMediatorAndHandlers()
+            .RegisterMassTransit()
             .RegisterInboxAndOutboxBackgroundJobs()
             .RegisterSerilog()
             .RegisterRepositories()
             .RegisterUnitOfWork()
             .RegisterInbox()
-            .RegisterMassTransit()
             .RegisterTelemetry()
             .RegisterHealthCheckV1()
-            .RegisterTimeProvider();;
+            .RegisterTimeProvider();
 
         var app = builder.Build();
 

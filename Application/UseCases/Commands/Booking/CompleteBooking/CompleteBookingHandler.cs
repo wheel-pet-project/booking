@@ -1,6 +1,7 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
 using Domain.SharedKernel.Errors;
+using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
 using FluentResults;
 using MediatR;
 
@@ -14,7 +15,8 @@ public class CompleteBookingHandler(
     public async Task<Result> Handle(CompleteBookingCommand command, CancellationToken cancellationToken)
     {
         var booking = await bookingRepository.GetById(command.BookingId);
-        if (booking == null) return Result.Fail(new NotFound("Booking not found"));
+        if (booking == null) throw new DataConsistencyViolationException(
+            $"Booking with id {command.BookingId} not found for completing");
         
         booking.Complete(timeProvider);
         

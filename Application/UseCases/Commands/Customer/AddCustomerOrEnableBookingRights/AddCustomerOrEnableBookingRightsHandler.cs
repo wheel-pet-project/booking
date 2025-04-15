@@ -6,11 +6,11 @@ using MediatR;
 
 namespace Application.UseCases.Commands.Customer.AddCustomerOrEnableBookingRights;
 
-public class AddCustomerOrEnableBookingHandler(
+public class AddCustomerOrEnableBookingRightsHandler(
     ICustomerRepository customerRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<AddCustomerOrEnableBookingCommand, Result>
+    IUnitOfWork unitOfWork) : IRequestHandler<AddCustomerOrEnableBookingRightsCommand, Result>
 {
-    public async Task<Result> Handle(AddCustomerOrEnableBookingCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddCustomerOrEnableBookingRightsCommand request, CancellationToken cancellationToken)
     {
         var existingCustomer = await customerRepository.GetById(request.CustomerId);
         if (existingCustomer == null)

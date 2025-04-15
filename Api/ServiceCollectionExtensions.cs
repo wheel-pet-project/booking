@@ -55,8 +55,8 @@ public static class ServiceCollectionExtensions
                 VehicleAddedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDED_TOPIC") ?? "vehicle-added-topic",
                 VehicleDeletedTopic = Environment.GetEnvironmentVariable("VEHICLE_DELETED_TOPIC") ??
                                       "vehicle-deleted-topic",
-                VehicleAddingProccessedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC") ??
-                                               "vehicle-adding-proccessed-topic",
+                VehicleAddingProcessedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC") ??
+                                               "vehicle-adding-to-booking-processed-topic",
                 BookingCreatedTopic = Environment.GetEnvironmentVariable("BOOKING_CREATED_TOPIC") ??
                                       "booking-created-topic",
                 BookingCanceledTopic = Environment.GetEnvironmentVariable("BOOKING_CANCELED_TOPIC") ??
@@ -84,7 +84,7 @@ public static class ServiceCollectionExtensions
                 DrivingLicenseExpiredTopic = GetEnvironmentOrThrow("DRIVING_LICENSE_EXPIRED_TOPIC"),
                 VehicleAddedTopic = GetEnvironmentOrThrow("VEHICLE_ADDED_TOPIC"),
                 VehicleDeletedTopic = GetEnvironmentOrThrow("VEHICLE_DELETED_TOPIC"),
-                VehicleAddingProccessedTopic = GetEnvironmentOrThrow("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC"),
+                VehicleAddingProcessedTopic = GetEnvironmentOrThrow("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC"),
                 BookingCreatedTopic = GetEnvironmentOrThrow("BOOKING_CREATED_TOPIC"),
                 BookingCanceledTopic = GetEnvironmentOrThrow("BOOKING_CANCELED_TOPIC"),
                 ModelCreatedTopic = GetEnvironmentOrThrow("MODEL_CREATED_TOPIC"),
@@ -197,7 +197,7 @@ public static class ServiceCollectionExtensions
         {
             config.VehicleAddedTopic = Configuration.VehicleAddedTopic;
             config.VehicleDeletedTopic = Configuration.VehicleDeletedTopic;
-            config.VehicleAddingToBookingProccessedTopic = Configuration.VehicleAddingProccessedTopic;
+            config.VehicleAddingToBookingProccessedTopic = Configuration.VehicleAddingProcessedTopic;
 
             config.BookingCreatedTopic = Configuration.BookingCreatedTopic;
             config.BookingCanceledTopic = Configuration.BookingCanceledTopic;
@@ -224,7 +224,7 @@ public static class ServiceCollectionExtensions
                 
                 rider.AddProducer<string, BookingCreated>(Configuration.BookingCreatedTopic);
                 rider.AddProducer<string, BookingCanceled>(Configuration.BookingCanceledTopic);
-                rider.AddProducer<string, VehicleAddingToBookingProcessed>(Configuration.VehicleAddingProccessedTopic);
+                rider.AddProducer<string, VehicleAddingToBookingProcessed>(Configuration.VehicleAddingProcessedTopic);
         
                 rider.UsingKafka((context, k) =>
                 {
@@ -466,7 +466,7 @@ internal class Configuration
     public required string DrivingLicenseApprovedTopic { get; init; }
     public required string VehicleAddedTopic { get; init; }
     public required string VehicleDeletedTopic { get; init; }
-    public required string VehicleAddingProccessedTopic { get; init; }
+    public required string VehicleAddingProcessedTopic { get; init; }
     public required string ModelCreatedTopic { get; init; }
     public required string ModelCategoryUpdatedTopic { get; init; }
     public required string BookingCreatedTopic { get; init; }

@@ -8,7 +8,7 @@ public class VehicleRepository(DataContext context) : IVehicleRepository
 {
     public async Task<Vehicle?> GetById(Guid id)
     {
-        return await context.Vehicles.FirstOrDefaultAsync(x => x.Id == id);
+        return await context.Vehicles.FirstOrDefaultAsync(x => x.Id == id && x.IsDeleted == false);
     }
     
     public async Task Add(Vehicle vehicle)

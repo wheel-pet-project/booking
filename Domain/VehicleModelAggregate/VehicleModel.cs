@@ -13,6 +13,9 @@ public class VehicleModel
         Category = category;
     }
     
+    public Guid Id { get; private set; }
+    public Category Category { get; private set; } = null!;
+    
     public void ChangeCategory(Category potentialCategory)
     {
         if (potentialCategory == null)
@@ -20,9 +23,6 @@ public class VehicleModel
 
         Category = potentialCategory;
     }
-    
-    public Guid Id { get; private set; }
-    public Category Category { get; private set; } = null!;
 
     public static VehicleModel Create(Guid id, Category category)
     {

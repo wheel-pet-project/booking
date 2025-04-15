@@ -15,6 +15,6 @@ public class DrivingLicenseApprovedConsumerEvent(
     
     public IRequest<Result> ToCommand()
     {
-        return new AddCustomerOrEnableBookingCommand(AccountId, Categories);
+        return new AddCustomerOrEnableBookingRightsCommand(AccountId, Categories);
     }
 }

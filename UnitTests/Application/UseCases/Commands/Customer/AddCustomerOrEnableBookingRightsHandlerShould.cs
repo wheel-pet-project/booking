@@ -9,21 +9,21 @@ using Xunit;
 
 namespace UnitTests.Application.UseCases.Commands.Customer;
 
-[TestSubject(typeof(AddCustomerOrEnableBookingHandler))]
-public class AddCustomerHandlerShould
+[TestSubject(typeof(AddCustomerOrEnableBookingRightsHandler))]
+public class AddCustomerOrEnableBookingRightsHandlerShould
 {
     private readonly Mock<ICustomerRepository> _customerRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-    private readonly AddCustomerOrEnableBookingCommand _orEnableBookingCommand = new(Guid.NewGuid(), ['B']);
+    private readonly AddCustomerOrEnableBookingRightsCommand _orEnableBookingRightsCommand = new(Guid.NewGuid(), ['B']);
     
-    private readonly AddCustomerOrEnableBookingHandler _orEnableBookingHandler;
+    private readonly AddCustomerOrEnableBookingRightsHandler _orEnableBookingRightsHandler;
 
-    public AddCustomerHandlerShould()
+    public AddCustomerOrEnableBookingRightsHandlerShould()
     {
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Ok);
         
-        _orEnableBookingHandler = new AddCustomerOrEnableBookingHandler(_customerRepositoryMock.Object, _unitOfWorkMock.Object);
+        _orEnableBookingRightsHandler = new AddCustomerOrEnableBookingRightsHandler(_customerRepositoryMock.Object, _unitOfWorkMock.Object);
     }
     
     [Fact]
@@ -32,7 +32,7 @@ public class AddCustomerHandlerShould
         // Arrange
 
         // Act
-        var actual = await _orEnableBookingHandler.Handle(_orEnableBookingCommand, TestContext.Current.CancellationToken);
+        var actual = await _orEnableBookingRightsHandler.Handle(_orEnableBookingRightsCommand, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(actual.IsSuccess);
@@ -45,7 +45,7 @@ public class AddCustomerHandlerShould
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Fail(new CommitFail("", new Exception())));
 
         // Act
-        var actual = await _orEnableBookingHandler.Handle(_orEnableBookingCommand, TestContext.Current.CancellationToken);
+        var actual = await _orEnableBookingRightsHandler.Handle(_orEnableBookingRightsCommand, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(actual.IsSuccess);
