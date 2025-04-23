@@ -10,14 +10,14 @@ public class AddCustomerOrEnableBookingRightsHandler(
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<AddCustomerOrEnableBookingRightsCommand, Result>
 {
-    public async Task<Result> Handle(AddCustomerOrEnableBookingRightsCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddCustomerOrEnableBookingRightsCommand command, CancellationToken _)
     {
-        var existingCustomer = await customerRepository.GetById(request.CustomerId);
+        var existingCustomer = await customerRepository.GetById(command.CustomerId);
         if (existingCustomer == null)
         {
-            var categories = request.Categories.Select(Category.Create).ToList();
+            var categories = command.Categories.Select(Category.Create).ToList();
         
-            var customer = Domain.CustomerAggregate.Customer.Create(request.CustomerId, categories);
+            var customer = Domain.CustomerAggregate.Customer.Create(command.CustomerId, categories);
             
             await customerRepository.Add(customer);
         }

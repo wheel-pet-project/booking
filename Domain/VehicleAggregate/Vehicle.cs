@@ -27,14 +27,15 @@ public sealed class Vehicle : Aggregate
         IsDeleted = true;
     }
 
-    public static Vehicle Create(Guid id, VehicleModel vehicleModel)
+    public static Vehicle Create(Guid sagaId, Guid id, VehicleModel vehicleModel)
     {
+        if (sagaId == Guid.Empty) throw new ValueIsRequiredException($"{nameof(sagaId)} cannot be empty");
         if (id == Guid.Empty) throw new ValueIsRequiredException($"{nameof(id)} cannot be empty");
         if (vehicleModel == null) throw new ValueIsRequiredException($"{nameof(vehicleModel)} cannot be null");
 
         var vehicle = new Vehicle(id, vehicleModel.Id);
         
-        vehicle.AddDomainEvent(new VehicleAddedDomainEvent(vehicle.Id));
+        vehicle.AddDomainEvent(new VehicleAddedDomainEvent(sagaId, vehicle.Id));
         
         return vehicle;
     }

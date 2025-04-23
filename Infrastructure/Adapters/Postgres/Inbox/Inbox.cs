@@ -1,36 +1,33 @@
+using Dapper;
 using Infrastructure.Adapters.Postgres.Inbox.InputConsumerEvents;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Npgsql;
 
 namespace Infrastructure.Adapters.Postgres.Inbox;
 
-public class Inbox(DataContext context) : IInbox
+public class Inbox(NpgsqlDataSource dataSource) : IInbox
 {
-    private const int DuplicateKeyCode = 23505; // duplicate key value violates unique constraint code
+    private const string DuplicateKeyCode = "23505"; // duplicate key value violates unique constraint code
 
     private readonly JsonSerializerSettings _jsonSettings = new() { TypeNameHandling = TypeNameHandling.All };
 
-    public async Task<bool> Save(IInputConsumerEvent inputConsumerEvent)
+    public async Task<bool> Save(IInputConsumerEvent consumerEvent)
     {
-        var inboxEvent = new InboxEvent
-        {
-            EventId = inputConsumerEvent.EventId,
-            Type = inputConsumerEvent.GetType().Name,
-            Content = JsonConvert.SerializeObject(inputConsumerEvent, _jsonSettings),
-            OccurredOnUtc = DateTime.UtcNow
-        };
-
-        await using var transaction = await context.Database.BeginTransactionAsync();
+        await using var connection = await dataSource.OpenConnectionAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
         try
         {
-            await context.Inbox.AddAsync(inboxEvent);
-
-            await context.SaveChangesAsync();
+            await connection.ExecuteAsync(Sql, new
+            {
+                @EventId = consumerEvent.EventId,
+                Type = consumerEvent.GetType().Name,
+                Content = JsonConvert.SerializeObject(consumerEvent, _jsonSettings),
+                OccurredOnUtc = DateTime.UtcNow,
+            }, transaction);
+            
             await transaction.CommitAsync();
-            return true;
         }
-        catch (DbUpdateException e) when (e.InnerException is PostgresException { ErrorCode: DuplicateKeyCode })
+        catch (PostgresException e) when (e is { SqlState: DuplicateKeyCode })
         {
             return true;
         }
@@ -38,5 +35,13 @@ public class Inbox(DataContext context) : IInbox
         {
             return false;
         }
+        
+        return true;
     }
+
+    private const string Sql =
+        """
+        INSERT INTO inbox (event_id, type, content, occurred_on_utc)
+        VALUES (@EventId, @Type, @Content, @OccurredOnUtc)
+        """;
 }

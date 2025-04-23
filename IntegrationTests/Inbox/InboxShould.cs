@@ -12,7 +12,7 @@ public class InboxShould : IntegrationTestBase
     private Infrastructure.Adapters.Postgres.Inbox.Inbox _inbox = null!;
 
     private readonly IInputConsumerEvent _event =
-        new VehicleAddedConsumerEvent(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+        new VehicleAddedConsumerEvent(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
     private readonly JsonSerializerSettings _jsonSerializerSettings = new()
     {
@@ -24,7 +24,7 @@ public class InboxShould : IntegrationTestBase
     public async Task SaveEvents()
     {
         // Arrange
-        _inbox = new Infrastructure.Adapters.Postgres.Inbox.Inbox(Context);
+        _inbox = new Infrastructure.Adapters.Postgres.Inbox.Inbox(DataSource);
 
         // Act
         await _inbox.Save(_event);

@@ -32,7 +32,7 @@ public class BookVehicleHandlerShould
 
     public BookVehicleHandlerShould()
     {
-        _vehicle = global::Domain.VehicleAggregate.Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        _vehicle = global::Domain.VehicleAggregate.Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         _customerRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(_customer);
         _vehicleRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(_vehicle);

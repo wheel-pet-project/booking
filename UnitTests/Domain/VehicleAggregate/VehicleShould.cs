@@ -12,6 +12,8 @@ public class VehicleShould
 {
     private readonly Category _category = Category.Create(Category.BCategory);
 
+    private readonly Guid _sagaId = Guid.NewGuid();
+    private readonly Guid _vehicleId = Guid.NewGuid();
     private readonly VehicleModel _vehicleModel =
         VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
     
@@ -19,13 +21,12 @@ public class VehicleShould
     public void CreateNewInstanceWithCorrectValues()
     {
         // Arrange
-        var vehicleId = Guid.NewGuid();
 
         // Act
-        var actual = Vehicle.Create(vehicleId, _vehicleModel);
+        var actual = Vehicle.Create(_sagaId, _vehicleId, _vehicleModel);
 
         // Assert
-        Assert.Equal(vehicleId, actual.Id);
+        Assert.Equal(_vehicleId, actual.Id);
         Assert.Equal(_vehicleModel.Id, actual.VehicleModelId);
     }
 
@@ -35,7 +36,7 @@ public class VehicleShould
         // Arrange
 
         // Act
-        void Act() => Vehicle.Create(Guid.Empty, _vehicleModel);
+        void Act() => Vehicle.Create(_sagaId, Guid.Empty, _vehicleModel);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -45,10 +46,9 @@ public class VehicleShould
     public void ThrowValueIsRequiredExceptionIfVehicleModelIsNull()
     {
         // Arrange
-        var vehicleId = Guid.NewGuid();
 
         // Act
-        void Act() => Vehicle.Create(vehicleId, null!);
+        void Act() => Vehicle.Create(_sagaId, _vehicleId, null!);
 
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
@@ -58,7 +58,7 @@ public class VehicleShould
     public void Delete()
     {
         // Arrange
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(_sagaId, _vehicleId, _vehicleModel);
 
         // Act
         vehicle.Delete();
@@ -66,8 +66,6 @@ public class VehicleShould
         // Assert
         Assert.True(vehicle.IsDeleted);
     }
-    
-    
 
     [Fact]
     public void AddDomainEventIfCreated()
@@ -75,7 +73,7 @@ public class VehicleShould
         // Arrange
 
         // Act
-        var actual = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var actual = Vehicle.Create(_sagaId, _vehicleId, _vehicleModel);
 
         // Assert
         Assert.NotEmpty(actual.DomainEvents);

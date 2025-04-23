@@ -34,7 +34,7 @@ public class BookingFreeWaitExpiredHandlerShould
     {
         var fakeTimeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow.AddHours(-1));
         
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
         booking.Book(fakeTimeProvider);
 

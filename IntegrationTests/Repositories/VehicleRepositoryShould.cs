@@ -3,6 +3,7 @@ using Domain.VehicleAggregate;
 using Domain.VehicleModelAggregate;
 using Infrastructure.Adapters.Postgres;
 using Infrastructure.Adapters.Postgres.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace IntegrationTests.Repositories;
@@ -19,7 +20,7 @@ public class VehicleRepositoryShould : IntegrationTestBase
         await Context.VehicleModels.AddAsync(_vehicleModel, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
@@ -42,7 +43,7 @@ public class VehicleRepositoryShould : IntegrationTestBase
         await Context.VehicleModels.AddAsync(_vehicleModel, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repositoryForArrange, uowForArrange) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
@@ -59,7 +60,7 @@ public class VehicleRepositoryShould : IntegrationTestBase
 
         // Assert
         Context.ChangeTracker.Clear();
-        var vehicleFromDb = await repository.GetById(vehicle.Id);
+        var vehicleFromDb = await Context.Vehicles.FirstOrDefaultAsync(x => x.Id == vehicle.Id, TestContext.Current.CancellationToken);
         Assert.NotNull(vehicleFromDb);
         Assert.Equivalent(vehicle, vehicleFromDb);
     }
@@ -71,7 +72,7 @@ public class VehicleRepositoryShould : IntegrationTestBase
         await Context.VehicleModels.AddAsync(_vehicleModel, TestContext.Current.CancellationToken);
         await Context.SaveChangesAsync(TestContext.Current.CancellationToken);
         
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);

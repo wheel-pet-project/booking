@@ -20,7 +20,7 @@ public class AddVehicleHandlerShould
     private readonly Mock<IVehicleRepository> _vehicleRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     
-    private readonly AddVehicleCommand _command = new AddVehicleCommand(Guid.NewGuid(), Guid.NewGuid());
+    private readonly AddVehicleCommand _command = new AddVehicleCommand(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
     
     private readonly AddVehicleHandler _handler;
 

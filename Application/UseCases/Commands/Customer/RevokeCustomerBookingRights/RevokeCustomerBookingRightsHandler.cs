@@ -10,9 +10,9 @@ public class RevokeCustomerBookingRightsHandler(
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RevokeCustomerBookingRightsCommand, Result>
 {
-    public async Task<Result> Handle(RevokeCustomerBookingRightsCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RevokeCustomerBookingRightsCommand command, CancellationToken _)
     {
-        var customer = await customerRepository.GetById(request.CustomerId);
+        var customer = await customerRepository.GetById(command.CustomerId);
         if (customer == null) return Result.Fail(new NotFound("Customer with this id not found"));
         
         customer.RevokeBookingRights();

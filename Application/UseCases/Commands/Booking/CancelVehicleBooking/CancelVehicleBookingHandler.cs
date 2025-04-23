@@ -11,9 +11,9 @@ public class CancelVehicleBookingHandler(
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : IRequestHandler<CancelVehicleBookingCommand, Result>
 {
-    public async Task<Result> Handle(CancelVehicleBookingCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CancelVehicleBookingCommand command, CancellationToken _)
     {
-        var booking = await bookingRepository.GetById(request.BookingId);
+        var booking = await bookingRepository.GetById(command.BookingId);
         if (booking == null) return Result.Fail(new NotFound("Booking not found"));
         
         booking.Cancel(timeProvider);

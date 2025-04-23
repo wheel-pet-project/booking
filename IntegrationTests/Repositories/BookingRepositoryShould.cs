@@ -19,7 +19,7 @@ public class BookingRepositoryShould : IntegrationTestBase
     public async Task Add()
     {
         // Arrange
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
         
@@ -43,7 +43,7 @@ public class BookingRepositoryShould : IntegrationTestBase
     public async Task Update()
     {
         // Arrange
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
         
@@ -74,7 +74,7 @@ public class BookingRepositoryShould : IntegrationTestBase
     public async Task GetById()
     {
         // Arrange
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
         

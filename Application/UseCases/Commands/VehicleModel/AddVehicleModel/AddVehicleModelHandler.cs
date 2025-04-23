@@ -10,10 +10,10 @@ public class AddVehicleModelHandler(
     IVehicleModelRepository vehicleModelRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<AddVehicleModelCommand, Result>
 {
-    public async Task<Result> Handle(AddVehicleModelCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(AddVehicleModelCommand command, CancellationToken _)
     {
-        var category = Category.Create(request.Category);
-        var vehicleModel = Domain.VehicleModelAggregate.VehicleModel.Create(request.Id, category);
+        var category = Category.Create(command.Category);
+        var vehicleModel = Domain.VehicleModelAggregate.VehicleModel.Create(command.Id, category);
         
         await vehicleModelRepository.Add(vehicleModel);
         

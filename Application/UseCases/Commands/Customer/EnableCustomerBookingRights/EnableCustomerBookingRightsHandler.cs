@@ -10,9 +10,9 @@ public class EnableCustomerBookingRightsHandler(
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<EnableCustomerBookingRightsCommand, Result>
 {
-    public async Task<Result> Handle(EnableCustomerBookingRightsCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(EnableCustomerBookingRightsCommand command, CancellationToken _)
     {
-        var customer = await customerRepository.GetById(request.CustomerId);
+        var customer = await customerRepository.GetById(command.CustomerId);
         if (customer == null) return Result.Fail(new NotFound("Customer with this id not found"));
         
         customer.EnableBookingRights();

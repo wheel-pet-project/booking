@@ -26,7 +26,7 @@ public class DeleteVehicleHandlerShould
 
     public DeleteVehicleHandlerShould()
     {
-        _vehicle = global::Domain.VehicleAggregate.Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        _vehicle = global::Domain.VehicleAggregate.Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         _vehicleRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>())).ReturnsAsync(_vehicle);
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Ok);

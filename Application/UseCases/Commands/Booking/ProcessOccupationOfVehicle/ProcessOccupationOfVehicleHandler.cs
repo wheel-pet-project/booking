@@ -11,7 +11,7 @@ public class ProcessOccupationOfVehicleHandler(
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : IRequestHandler<ProcessOccupationOfVehicleCommand, Result>
 {
-    public async Task<Result> Handle(ProcessOccupationOfVehicleCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ProcessOccupationOfVehicleCommand command, CancellationToken _)
     {
         var booking = await bookingRepository.GetById(command.BookingId);
         if (booking == null) throw new DataConsistencyViolationException(

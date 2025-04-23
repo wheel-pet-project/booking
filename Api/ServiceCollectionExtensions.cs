@@ -55,20 +55,23 @@ public static class ServiceCollectionExtensions
                 VehicleAddedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDED_TOPIC") ?? "vehicle-added-topic",
                 VehicleDeletedTopic = Environment.GetEnvironmentVariable("VEHICLE_DELETED_TOPIC") ??
                                       "vehicle-deleted-topic",
-                VehicleAddingProcessedTopic = Environment.GetEnvironmentVariable("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC") ??
-                                               "vehicle-adding-to-booking-processed-topic",
+                VehicleAddingProcessedTopic =
+                    Environment.GetEnvironmentVariable("VEHICLE_ADDING_TO_BOOKING_PROCESSED_TOPIC") ??
+                    "vehicle-adding-to-booking-processed-topic",
                 BookingCreatedTopic = Environment.GetEnvironmentVariable("BOOKING_CREATED_TOPIC") ??
                                       "booking-created-topic",
                 BookingCanceledTopic = Environment.GetEnvironmentVariable("BOOKING_CANCELED_TOPIC") ??
                                        "booking-canceled-topic",
                 ModelCreatedTopic = Environment.GetEnvironmentVariable("MODEL_CREATED_TOPIC") ??
-                "model-created-topic",
+                                    "model-created-topic",
                 ModelCategoryUpdatedTopic = Environment.GetEnvironmentVariable("MODEL_CATEGORY_UPDATED_TOPIC") ??
                                             "model-category-updated-topic",
                 VehicleCheckingStartedTopic = Environment.GetEnvironmentVariable("VEHICLE_CHECKING_STARTED_TOPIC") ??
                                               "vehicle-checking-started-topic",
                 MongoConnectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING") ??
                                         "mongodb://carsharing:password@localhost:27017/drivinglicense?authSource=admin",
+                VehicleOccupyingProcessedTopic = Environment.GetEnvironmentVariable("VEHICLE_OCCUPYING_PROCESSED_TOPIC") ??
+                "vehicle-occupying-processed-topic",
             },
             "Production" => new Configuration
             {
@@ -90,7 +93,8 @@ public static class ServiceCollectionExtensions
                 ModelCreatedTopic = GetEnvironmentOrThrow("MODEL_CREATED_TOPIC"),
                 ModelCategoryUpdatedTopic = GetEnvironmentOrThrow("MODEL_CATEGORY_UPDATED_TOPIC"),
                 VehicleCheckingStartedTopic = GetEnvironmentOrThrow("VEHICLE_CHECKING_STARTED_TOPIC"),
-                MongoConnectionString = GetEnvironmentOrThrow("MONGO_CONNECTION_STRING")
+                MongoConnectionString = GetEnvironmentOrThrow("MONGO_CONNECTION_STRING"),
+                VehicleOccupyingProcessedTopic = GetEnvironmentOrThrow("VEHICLE_OCCUPYING_PROCESSED_TOPIC"),
             },
             _ => throw new ArgumentException("Unknown environment")
         };
@@ -221,6 +225,7 @@ public static class ServiceCollectionExtensions
                 rider.AddConsumer<ModelCreatedConsumer>();
                 rider.AddConsumer<ModelCategoryUpdatedConsumer>();
                 rider.AddConsumer<VehicleCheckingStartedConsumer>();
+                rider.AddConsumer<VehicleOccupyingProcessedConsumer>();
                 
                 rider.AddProducer<string, BookingCreated>(Configuration.BookingCreatedTopic);
                 rider.AddProducer<string, BookingCanceled>(Configuration.BookingCanceledTopic);
@@ -346,6 +351,23 @@ public static class ServiceCollectionExtensions
                             e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
                             e.ConfigureConsumer<VehicleCheckingStartedConsumer>(context);
                         });
+                    
+                    k.TopicEndpoint<VehicleOccupyingProcessed>(Configuration.VehicleOccupyingProcessedTopic,
+                        "booking-consumer-group",
+                        e =>
+                        {
+                            e.EnableAutoOffsetStore = false;
+                            e.EnablePartitionEof = true;
+                            e.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            e.CreateIfMissing();
+                            e.UseKillSwitch(cfg =>
+                                cfg.SetActivationThreshold(1)
+                                    .SetRestartTimeout(TimeSpan.FromMinutes(1))
+                                    .SetTripThreshold(0.05)
+                                    .SetTrackingPeriod(TimeSpan.FromMinutes(1)));
+                            e.UseMessageRetry(retry => retry.Interval(200, TimeSpan.FromSeconds(1)));
+                            e.ConfigureConsumer<VehicleOccupyingProcessedConsumer>(context);
+                        });
         
                     k.Host(Configuration.BootstrapServers);
                 });
@@ -467,6 +489,7 @@ internal class Configuration
     public required string VehicleAddedTopic { get; init; }
     public required string VehicleDeletedTopic { get; init; }
     public required string VehicleAddingProcessedTopic { get; init; }
+    public required string VehicleOccupyingProcessedTopic { get; init; }
     public required string ModelCreatedTopic { get; init; }
     public required string ModelCategoryUpdatedTopic { get; init; }
     public required string BookingCreatedTopic { get; init; }

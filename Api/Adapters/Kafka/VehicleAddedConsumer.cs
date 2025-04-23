@@ -16,6 +16,7 @@ public class VehicleAddedConsumer(
         var @event = context.Message;
         var modelCreatedConsumerEvent = new VehicleAddedConsumerEvent(
             @event.EventId,
+            @event.SagaId,
             @event.VehicleId,
             @event.ModelId);
         

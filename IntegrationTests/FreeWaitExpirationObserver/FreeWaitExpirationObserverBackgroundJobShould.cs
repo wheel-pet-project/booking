@@ -26,7 +26,7 @@ public class FreeWaitExpirationObserverBackgroundJobShould : IntegrationTestBase
     public async Task CallMediatorIfFoundExpiredBooking()
     {
         // Arrange
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         await AddExpiredBooking(_vehicleModel, vehicle, _customer);
         
         var jobBuilder = new JobBuilder();

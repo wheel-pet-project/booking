@@ -1,6 +1,5 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
-using Domain.SharedKernel.Errors;
 using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
 using FluentResults;
 using MediatR;
@@ -12,7 +11,7 @@ public class CompleteBookingHandler(
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : IRequestHandler<CompleteBookingCommand, Result>
 {
-    public async Task<Result> Handle(CompleteBookingCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(CompleteBookingCommand command, CancellationToken _)
     {
         var booking = await bookingRepository.GetById(command.BookingId);
         if (booking == null) throw new DataConsistencyViolationException(

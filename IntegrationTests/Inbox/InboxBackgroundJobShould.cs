@@ -23,13 +23,13 @@ public class InboxBackgroundJobShould : IntegrationTestBase
     };
 
     private readonly IInputConsumerEvent _event =
-        new VehicleAddedConsumerEvent(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+        new VehicleAddedConsumerEvent(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
     [Fact]
     public async Task MarkProcessedEvents()
     {
         // Arrange
-        var inbox = new Infrastructure.Adapters.Postgres.Inbox.Inbox(Context);
+        var inbox = new Infrastructure.Adapters.Postgres.Inbox.Inbox(DataSource);
         await inbox.Save(_event);
         var jobBuilder = new InboxBackgroundJobBuilder(DataSource);
         var job = jobBuilder.Build();
@@ -38,6 +38,7 @@ public class InboxBackgroundJobShould : IntegrationTestBase
         await job.Execute(new Mock<IJobExecutionContext>().Object);
 
         // Assert
+        Context.ChangeTracker.Clear();
         var existEvents = Context.Inbox.Take(1).ToList();
         var actualEvent =
             JsonConvert.DeserializeObject<IInputConsumerEvent>(existEvents.First().Content, _jsonSerializerSettings);
@@ -49,7 +50,7 @@ public class InboxBackgroundJobShould : IntegrationTestBase
     public async Task ReadAndMediatorSendCommandOneTimes()
     {
         // Arrange
-        var inbox = new Infrastructure.Adapters.Postgres.Inbox.Inbox(Context);
+        var inbox = new Infrastructure.Adapters.Postgres.Inbox.Inbox(DataSource);
         await inbox.Save(_event);
         var jobBuilder = new InboxBackgroundJobBuilder(DataSource);
         var job = jobBuilder.Build();

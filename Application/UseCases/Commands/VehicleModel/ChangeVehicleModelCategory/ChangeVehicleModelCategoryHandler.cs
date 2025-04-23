@@ -11,11 +11,11 @@ public class ChangeVehicleModelCategoryHandler(
     IVehicleModelRepository vehicleModelRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<ChangeVehicleModelCategoryCommand, Result>
 {
-    public async Task<Result> Handle(ChangeVehicleModelCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ChangeVehicleModelCategoryCommand command, CancellationToken _)
     {
-        var potentialCategory = Category.Create(request.Category);
+        var potentialCategory = Category.Create(command.Category);
         
-        var vehicleModel = await vehicleModelRepository.GetById(request.Id);
+        var vehicleModel = await vehicleModelRepository.GetById(command.Id);
         if (vehicleModel == null) throw new DataConsistencyViolationException(
             "Vehicle model not found for changing category model");
         

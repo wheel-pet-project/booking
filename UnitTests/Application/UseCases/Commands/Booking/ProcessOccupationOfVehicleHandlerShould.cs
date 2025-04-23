@@ -1,6 +1,5 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
-using Application.UseCases.Commands.Booking.CompleteBooking;
 using Application.UseCases.Commands.Booking.ProcessOccupationOfVehicle;
 using Domain.SharedKernel.Errors;
 using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;

@@ -10,9 +10,9 @@ public class DeleteVehicleHandler(
     IVehicleRepository vehicleRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteVehicleCommand, Result>
 {
-    public async Task<Result> Handle(DeleteVehicleCommand request, CancellationToken _)
+    public async Task<Result> Handle(DeleteVehicleCommand command, CancellationToken _)
     {
-        var vehicle = await vehicleRepository.GetById(request.Id);
+        var vehicle = await vehicleRepository.GetById(command.Id);
         if (vehicle == null) return Result.Fail(new NotFound("Vehicle not found"));
         
         vehicle.Delete();

@@ -26,7 +26,7 @@ public class UnitOfWorkShould : IntegrationTestBase
     public async Task SaveDomainEventToOutbox()
     {
         // Arrange
-        var vehicle = Vehicle.Create(Guid.NewGuid(), _vehicleModel);
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         
         var expectedDomainEvent = vehicle.DomainEvents[0];
         var uowBuilder = new UnitOfWorkBuilder();

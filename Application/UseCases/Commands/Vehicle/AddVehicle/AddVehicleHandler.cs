@@ -11,12 +11,12 @@ public class AddVehicleHandler(
     IVehicleRepository vehicleRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<AddVehicleCommand, Result>
 {
-    public async Task<Result> Handle(AddVehicleCommand request, CancellationToken _)
+    public async Task<Result> Handle(AddVehicleCommand command, CancellationToken _)
     { 
-        var vehicleModel = await vehicleModelRepository.GetById(request.VehicleModelId);
+        var vehicleModel = await vehicleModelRepository.GetById(command.VehicleModelId);
         if (vehicleModel == null) return Result.Fail(new NotFound("Vehicle model not found"));
         
-        var vehicle = Domain.VehicleAggregate.Vehicle.Create(request.Id, vehicleModel);
+        var vehicle = Domain.VehicleAggregate.Vehicle.Create(command.SagaId, command.Id, vehicleModel);
         
         await vehicleRepository.Add(vehicle);
         

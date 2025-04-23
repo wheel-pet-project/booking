@@ -14,14 +14,14 @@ public class BookVehicleHandler(
     ICustomerRepository customerRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<BookVehicleCommand, Result<BookVehicleResponse>>
 {
-    public async Task<Result<BookVehicleResponse>> Handle(BookVehicleCommand request, CancellationToken _)
+    public async Task<Result<BookVehicleResponse>> Handle(BookVehicleCommand command, CancellationToken _)
     {
-        var customer = await customerRepository.GetById(request.CustomerId);
-        var vehicle = await vehicleRepository.GetById(request.VehicleId);
+        var customer = await customerRepository.GetById(command.CustomerId);
+        var vehicle = await vehicleRepository.GetById(command.VehicleId);
         
         if (customer == null) return Result.Fail(new NotFound("Customer not found or not loaded driving license"));
         if (vehicle == null) throw new DataConsistencyViolationException(
-            $"Vehicle with {request.VehicleId} not found for booking");
+            $"Vehicle with {command.VehicleId} not found for booking");
 
         var vehicleModel = await vehicleModelRepository.GetById(vehicle.VehicleModelId);
         if (vehicleModel == null) throw new DataConsistencyViolationException(
