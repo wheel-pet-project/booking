@@ -19,7 +19,7 @@ public class Inbox(NpgsqlDataSource dataSource) : IInbox
         {
             await connection.ExecuteAsync(Sql, new
             {
-                @EventId = consumerEvent.EventId,
+                EventId = consumerEvent.EventId,
                 Type = consumerEvent.GetType().Name,
                 Content = JsonConvert.SerializeObject(consumerEvent, _jsonSettings),
                 OccurredOnUtc = DateTime.UtcNow,
