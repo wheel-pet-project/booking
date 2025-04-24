@@ -5,14 +5,10 @@ using MassTransit;
 
 namespace Api.Adapters.Kafka;
 
-public class VehicleDeletedConsumer(
-    IServiceScopeFactory serviceScopeFactory,
-    IInbox inbox) : IConsumer<VehicleDeleted>
+public class VehicleDeletedConsumer(IInbox inbox) : IConsumer<VehicleDeleted>
 {
     public async Task Consume(ConsumeContext<VehicleDeleted> context)
     {
-        using var scope = serviceScopeFactory.CreateScope();
-
         var @event = context.Message;
         var modelCreatedConsumerEvent = new VehicleDeletedConsumerEvent(
             @event.EventId,

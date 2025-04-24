@@ -5,14 +5,10 @@ using MassTransit;
 
 namespace Api.Adapters.Kafka;
 
-public class DrivingLicenseApprovedConsumer(
-    IServiceScopeFactory serviceScopeFactory,
-    IInbox inbox) : IConsumer<DrivingLicenseApproved>
+public class DrivingLicenseApprovedConsumer(IInbox inbox) : IConsumer<DrivingLicenseApproved>
 {
     public async Task Consume(ConsumeContext<DrivingLicenseApproved> context)
     {
-        using var scope = serviceScopeFactory.CreateScope();
-
         var @event = context.Message;
         var drivingLicenseApprovedConsumerEvent = new DrivingLicenseApprovedConsumerEvent(
             @event.EventId,

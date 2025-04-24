@@ -5,14 +5,10 @@ using MassTransit;
 
 namespace Api.Adapters.Kafka;
 
-public class ModelCategoryUpdatedConsumer(
-    IServiceScopeFactory serviceScopeFactory,
-    IInbox inbox) : IConsumer<ModelCategoryUpdated>
+public class ModelCategoryUpdatedConsumer(IInbox inbox) : IConsumer<ModelCategoryUpdated>
 {
     public async Task Consume(ConsumeContext<ModelCategoryUpdated> context)
     {
-        using var scope = serviceScopeFactory.CreateScope();
-
         var @event = context.Message;
         var modelCategoryUpdatedConsumerEvent = new ModelCategoryUpdatedConsumerEvent(
             @event.EventId,
