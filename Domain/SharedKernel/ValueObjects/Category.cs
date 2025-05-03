@@ -1,5 +1,5 @@
 using CSharpFunctionalExtensions;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 
 namespace Domain.SharedKernel.ValueObjects;
 
@@ -26,7 +26,7 @@ public sealed class Category : ValueObject
     public static Category Create(char input)
     {
         if (GetSupportedCategories().Contains(input) is false)
-            throw new ValueOutOfRangeException($"{nameof(input)} category is a not supported category");
+            throw new ValueIsUnsupportedException($"{nameof(input)} category is a not supported category");
 
         return new Category(input);
     }

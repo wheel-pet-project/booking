@@ -1,5 +1,5 @@
 using Domain.CustomerAggregate;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -35,7 +35,7 @@ public class LoyaltyPointsShould
         }
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class LoyaltyPointsShould
         }
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
 
     [Fact]

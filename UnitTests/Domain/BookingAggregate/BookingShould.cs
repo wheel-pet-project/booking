@@ -1,7 +1,7 @@
 using Domain.BookingAggregate;
 using Domain.CustomerAggregate;
-using Domain.SharedKernel.Exceptions.ArgumentException;
-using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 using Domain.VehicleModelAggregate;
 using JetBrains.Annotations;
@@ -13,13 +13,15 @@ namespace UnitTests.Domain.BookingAggregate;
 [TestSubject(typeof(Booking))]
 public class BookingShould
 {
-    private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [ Category.Create(Category.BCategory) ]);
+    private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]);
+
     private readonly VehicleModel _vehicleModel =
         VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
+
     private readonly Guid _vehicleId = Guid.NewGuid();
     private readonly TimeProvider _timeProvider = TimeProvider.System;
     private readonly FakeTimeProvider _fakeTimeProvider = new();
-    
+
     [Fact]
     public void CreateNewInstanceWithCorrectValues()
     {
@@ -73,12 +75,12 @@ public class BookingShould
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
-    
+
     [Fact]
     public void ThrowValueIsRequiredExceptionIfVehicleIdIsEmpty()
     {
         // Arrange
-        
+
         // Act
         void Act() => Booking.Create(_customer, _vehicleModel, Guid.Empty);
 
@@ -167,7 +169,7 @@ public class BookingShould
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);
     }
-    
+
     [Fact]
     public void CompleteChangeStatus()
     {
@@ -188,7 +190,7 @@ public class BookingShould
         // Arrange
         var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
-        
+
         // Act
         booking.Complete(_timeProvider);
 
@@ -196,7 +198,7 @@ public class BookingShould
         Assert.NotNull(booking.End);
         Assert.NotEqual(default, booking.End.Value);
     }
-    
+
     [Fact]
     public void CompleteAddDomainEvent()
     {
@@ -204,7 +206,7 @@ public class BookingShould
         var booking = Booking.Create(_customer, _vehicleModel, _vehicleId);
         booking.Book(_timeProvider);
         booking.ClearDomainEvents();
-        
+
         // Act
         booking.Complete(_timeProvider);
 
@@ -224,7 +226,7 @@ public class BookingShould
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
-    
+
     [Fact]
     public void CompleteThrowDomainRulesViolationExceptionIfBookingCannotBeCompleted()
     {
@@ -310,7 +312,7 @@ public class BookingShould
         // Assert
         Assert.Equal(Status.Canceled, booking.Status);
     }
-    
+
     [Fact]
     public void ExpireSetEndProperty()
     {
@@ -325,7 +327,7 @@ public class BookingShould
         // Assert
         Assert.NotNull(booking.End);
     }
-    
+
     [Fact]
     public void ExpireAddDomainEvent()
     {
@@ -341,7 +343,7 @@ public class BookingShould
         // Assert
         Assert.NotEmpty(booking.DomainEvents);
     }
-    
+
     [Fact]
     public void ExpireThrowDomainRulesViolationExceptionIfBookingCannotBeExpired()
     {
@@ -381,5 +383,4 @@ public class BookingShould
         // Assert
         Assert.Throws<DomainRulesViolationException>(Act);
     }
-    
 }

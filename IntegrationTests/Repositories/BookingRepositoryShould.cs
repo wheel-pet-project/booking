@@ -12,6 +12,7 @@ namespace IntegrationTests.Repositories;
 public class BookingRepositoryShould : IntegrationTestBase
 {
     private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]);
+
     private readonly VehicleModel _vehicleModel =
         VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
 
@@ -20,11 +21,11 @@ public class BookingRepositoryShould : IntegrationTestBase
     {
         // Arrange
         var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
-        
+
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
-        
+
         var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
-        
+
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
 
@@ -44,11 +45,11 @@ public class BookingRepositoryShould : IntegrationTestBase
     {
         // Arrange
         var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
-        
+
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
-        
+
         var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
-        
+
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repositoryForArrange, uowForArrange) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
 
@@ -56,7 +57,7 @@ public class BookingRepositoryShould : IntegrationTestBase
         await uowForArrange.Commit();
 
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
-        
+
         booking.Book(TimeProvider.System);
 
         // Act
@@ -75,21 +76,47 @@ public class BookingRepositoryShould : IntegrationTestBase
     {
         // Arrange
         var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
-        
+
         await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
-        
+
         var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
-        
+
         var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
         var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
 
         await repository.Add(booking);
         await uow.Commit();
-        
+
         Context.ChangeTracker.Clear();
 
         // Act
         var actual = await repository.GetById(booking.Id);
+
+        // Assert
+        Assert.NotNull(actual);
+        Assert.Equivalent(booking, actual);
+    }
+
+    [Fact]
+    public async Task GetLastByCustomerId()
+    {
+        // Arrange
+        var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
+
+        await AddVehicleModelAndVehicleAndCustomer(_vehicleModel, vehicle, _customer);
+
+        var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
+
+        var repositoryAndUowAndUnitOfWorkBuilderBuilder = new RepositoryAndUnitOfWorkBuilder();
+        var (repository, uow) = repositoryAndUowAndUnitOfWorkBuilderBuilder.Build(Context);
+
+        await repository.Add(booking);
+        await uow.Commit();
+
+        Context.ChangeTracker.Clear();
+
+        // Act
+        var actual = await repository.GetLastByCustomerId(booking.CustomerId);
 
         // Assert
         Assert.NotNull(actual);
@@ -103,11 +130,11 @@ public class BookingRepositoryShould : IntegrationTestBase
     {
         await Context.VehicleModels.AddAsync(vehicleModel);
         await Context.SaveChangesAsync();
-        
+
         await Context.Vehicles.AddAsync(vehicle);
-        
+
         Context.Attach(customer.Level);
-        
+
         await Context.Customers.AddAsync(customer);
         await Context.SaveChangesAsync();
     }

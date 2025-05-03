@@ -2,6 +2,8 @@ using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
 using Application.UseCases.Commands.VehicleModel.AddVehicleModel;
 using Domain.SharedKernel.Errors;
+using Domain.SharedKernel.Exceptions.InternalExceptions.AlreadyHaveThisState;
+using Domain.SharedKernel.ValueObjects;
 using FluentResults;
 using JetBrains.Annotations;
 using Moq;
@@ -16,13 +18,13 @@ public class AddVehicleModelHandlerShould
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
     private readonly AddVehicleModelCommand _command = new(Guid.NewGuid(), 'B');
-    
+
     private readonly AddVehicleModelHandler _handler;
 
     public AddVehicleModelHandlerShould()
     {
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Ok);
-        
+
         _handler = new AddVehicleModelHandler(_vehicleModelRepositoryMock.Object, _unitOfWorkMock.Object);
     }
 
@@ -39,11 +41,26 @@ public class AddVehicleModelHandlerShould
     }
 
     [Fact]
+    public async Task ThrowAlreadyHaveThisStateExceptionIfVehicleModelAlreadyExist()
+    {
+        // Arrange
+        _vehicleModelRepositoryMock.Setup(x => x.GetById(It.IsAny<Guid>()))
+            .ReturnsAsync(global::Domain.VehicleModelAggregate.VehicleModel.Create(Guid.NewGuid(),
+                Category.Create(Category.BCategory)));
+
+        // Act
+        async Task Act() => await _handler.Handle(_command, TestContext.Current.CancellationToken);
+
+        // Assert
+        await Assert.ThrowsAsync<AlreadyHaveThisStateException>(Act);
+    }
+
+    [Fact]
     public async Task ReturnCommitFailErrorIfCommitFailed()
     {
         // Arrange
         _unitOfWorkMock.Setup(x => x.Commit()).ReturnsAsync(Result.Fail(new CommitFail("", new Exception())));
-        
+
         // Act
         var actual = await _handler.Handle(_command, TestContext.Current.CancellationToken);
 

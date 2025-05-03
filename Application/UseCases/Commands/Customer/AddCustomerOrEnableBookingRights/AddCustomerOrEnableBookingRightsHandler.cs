@@ -16,18 +16,17 @@ public class AddCustomerOrEnableBookingRightsHandler(
         if (existingCustomer == null)
         {
             var categories = command.Categories.Select(Category.Create).ToList();
-        
             var customer = Domain.CustomerAggregate.Customer.Create(command.CustomerId, categories);
-            
+
             await customerRepository.Add(customer);
         }
         else
         {
             existingCustomer.EnableBookingRights();
-            
+
             customerRepository.Update(existingCustomer);
         }
-        
+
         return await unitOfWork.Commit();
     }
 }

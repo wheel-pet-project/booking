@@ -13,17 +13,26 @@ public class BookingRepository(DataContext context) : IBookingRepository
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<Booking?> GetLastByCustomerId(Guid customerId)
+    {
+        return await context.Bookings
+            .Include(x => x.Status)
+            .Where(x => x.CustomerId == customerId)
+            .OrderByDescending(x => x.Start)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task Add(Booking booking)
     {
         context.Attach(booking.Status);
-        
+
         await context.Bookings.AddAsync(booking);
     }
 
     public void Update(Booking booking)
     {
         context.Attach(booking.Status);
-        
+
         context.Bookings.Update(booking);
     }
 }

@@ -2,7 +2,7 @@ using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
 using Application.UseCases.Commands.Booking.ProcessOccupationOfVehicle;
 using Domain.SharedKernel.Errors;
-using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
 using Domain.SharedKernel.ValueObjects;
 using FluentResults;
 using JetBrains.Annotations;
@@ -18,12 +18,12 @@ public class ProcessOccupationOfVehicleHandlerShould
         global::Domain.CustomerAggregate.Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]),
         global::Domain.VehicleModelAggregate.VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory)),
         Guid.NewGuid());
-    
+
     private Mock<IBookingRepository> _bookingRepositoryMock = new();
     private Mock<IUnitOfWork> _unitOfWorkMock = new();
 
-    private readonly ProcessOccupationOfVehicleCommand _command = new (Guid.NewGuid(), true);
-    
+    private readonly ProcessOccupationOfVehicleCommand _command = new(Guid.NewGuid(), true);
+
     private ProcessOccupationOfVehicleHandler _handler;
 
     public ProcessOccupationOfVehicleHandlerShould()

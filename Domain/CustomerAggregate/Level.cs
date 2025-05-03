@@ -1,6 +1,6 @@
 using CSharpFunctionalExtensions;
-using Domain.SharedKernel.Exceptions.ArgumentException;
-using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 
 namespace Domain.CustomerAggregate;
@@ -8,7 +8,9 @@ namespace Domain.CustomerAggregate;
 public sealed class Level : Entity<int>
 {
     public static readonly Level Standart = new(1, nameof(Standart).ToLowerInvariant(), LoyaltyPoints.Create(1));
-    public static readonly Level Trustworthy = new(2, nameof(Trustworthy).ToLowerInvariant(), LoyaltyPoints.Create(100));
+
+    public static readonly Level
+        Trustworthy = new(2, nameof(Trustworthy).ToLowerInvariant(), LoyaltyPoints.Create(100));
 
     private Level()
     {
@@ -21,8 +23,8 @@ public sealed class Level : Entity<int>
         NeededPoints = neededPoints;
     }
 
-    public string Name { get; private set; } = null!;
-    public LoyaltyPoints NeededPoints { get; private set; } = null!;
+    public string Name { get; } = null!;
+    public LoyaltyPoints NeededPoints { get; } = null!;
 
     public bool IsNeededChange(LoyaltyPoints currentPoints)
     {
@@ -33,16 +35,33 @@ public sealed class Level : Entity<int>
 
     public Level GetNewLevelForChanging(LoyaltyPoints currentPoints)
     {
-        if (IsNeededChange(currentPoints) == false) throw new DomainRulesViolationException(
-            $"{nameof(currentPoints)} not in range for changing level");
+        if (IsNeededChange(currentPoints) == false)
+            throw new DomainRulesViolationException(
+                $"{nameof(currentPoints)} not in range for changing level");
 
-        if (currentPoints < NeededPoints) return All().SingleOrDefault(x => x.Id == Id - 1) ?? Standart;
+        return currentPoints < NeededPoints
+            ? GetLevelDownOrThrow()
+            : GetLevelUpOrThrow();
 
-        var nextLevel = All().SingleOrDefault(x => x.Id == Id + 1);
-        if (nextLevel == null) throw new DomainRulesViolationException(
-                "This level already max, validation for needing changing incorrect");
+        Level GetLevelDownOrThrow()
+        {
+            var levelDown = All().SingleOrDefault(x => x.Id == Id - 1);
+            if (levelDown == null)
+                throw new DomainRulesViolationException(
+                    "This level already min, validation for needing changing incorrect");
 
-        return nextLevel;
+            return levelDown;
+        }
+
+        Level GetLevelUpOrThrow()
+        {
+            var levelUp = All().SingleOrDefault(x => x.Id == Id + 1);
+            if (levelUp == null)
+                throw new DomainRulesViolationException(
+                    "This level already max, validation for needing changing incorrect");
+
+            return levelUp;
+        }
     }
 
     public FreeWait GetFreeWaitDuration()
@@ -51,7 +70,7 @@ public sealed class Level : Entity<int>
         {
             _ when this == Standart => FreeWait.StandartFreeWait,
             _ when this == Trustworthy => FreeWait.IncreaseFreeWait,
-            _ => throw new ValueOutOfRangeException("Unknown level")
+            _ => throw new ValueIsUnsupportedException("Unknown level")
         };
     }
 
@@ -59,14 +78,14 @@ public sealed class Level : Entity<int>
     {
         var level = All()
             .SingleOrDefault(s => string.Equals(s.Name, name, StringComparison.CurrentCultureIgnoreCase));
-        if (level == null) throw new ValueOutOfRangeException($"{nameof(name)} unknown level or null");
+        if (level == null) throw new ValueIsUnsupportedException($"{nameof(name)} unknown level or null");
         return level;
     }
 
     public static Level FromId(int id)
     {
         var level = All().SingleOrDefault(s => s.Id == id);
-        if (level == null) throw new ValueOutOfRangeException($"{nameof(id)} unknown level or null");
+        if (level == null) throw new ValueIsUnsupportedException($"{nameof(id)} unknown level or null");
         return level;
     }
 

@@ -13,7 +13,7 @@ public class KafkaProducer(
     IOptions<KafkaTopicsConfiguration> topicsConfiguration) : IMessageBus
 {
     private readonly KafkaTopicsConfiguration _configuration = topicsConfiguration.Value;
-    
+
     public async Task Publish(BookingCanceledDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         var producer = topicProducerProvider.GetProducer<string, BookingCanceled>(
@@ -21,9 +21,9 @@ public class KafkaProducer(
 
         await producer.Produce(domainEvent.EventId.ToString(),
             new BookingCanceled(
-                domainEvent.EventId, 
-                domainEvent.BookingId, 
-                domainEvent.VehicleId, 
+                domainEvent.EventId,
+                domainEvent.BookingId,
+                domainEvent.VehicleId,
                 domainEvent.CustomerId),
             SetMessageId<BookingCanceled, BookingCanceledDomainEvent>(domainEvent), cancellationToken);
     }
@@ -35,9 +35,9 @@ public class KafkaProducer(
 
         await producer.Produce(domainEvent.EventId.ToString(),
             new BookingCreated(
-                domainEvent.EventId, 
-                domainEvent.BookingId, 
-                domainEvent.VehicleId, 
+                domainEvent.EventId,
+                domainEvent.BookingId,
+                domainEvent.VehicleId,
                 domainEvent.CustomerId),
             SetMessageId<BookingCreated, BookingCreatedDomainEvent>(domainEvent), cancellationToken);
     }
@@ -49,12 +49,13 @@ public class KafkaProducer(
 
         await producer.Produce(domainEvent.EventId.ToString(),
             new VehicleAddingToBookingProcessed(
-                domainEvent.EventId, 
+                domainEvent.EventId,
+                domainEvent.SagaId,
                 domainEvent.VehicleId,
                 true),
             SetMessageId<VehicleAddingToBookingProcessed, VehicleAddedDomainEvent>(domainEvent), cancellationToken);
     }
-    
+
     private IPipe<KafkaSendContext<string, TContractEvent>> SetMessageId<TContractEvent, TDomainEvent>(
         TDomainEvent domainEvent)
         where TDomainEvent : DomainEvent

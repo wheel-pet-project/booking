@@ -1,7 +1,7 @@
 using Application.UseCases.Commands.Booking.BookVehicle;
 using Application.UseCases.Commands.Booking.CancelVehicleBooking;
 using Domain.SharedKernel.Errors;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using FluentResults;
 using Grpc.Core;
 using MediatR;
@@ -17,19 +17,21 @@ public class BookingV1(IMediator mediator) : Booking.BookingBase
             ParseGuidOrThrow(request.CustomerId)));
 
         return response.IsSuccess
-            ? new BookVehicleResponse { BookingId = response.Value.BookingId.ToString()}
+            ? new BookVehicleResponse { BookingId = response.Value.BookingId.ToString() }
             : ParseErrorToRpcException<BookVehicleResponse>(response.Errors);
     }
 
-    public override async Task<CancelBookingResponse> CancelBookingVehicle(CancelBookingRequest request, ServerCallContext context)
+    public override async Task<CancelBookingResponse> CancelBookingVehicle(
+        CancelBookingRequest request,
+        ServerCallContext context)
     {
         var response = await mediator.Send(new CancelVehicleBookingCommand(ParseGuidOrThrow(request.BookingId)));
-        
+
         return response.IsSuccess
             ? new CancelBookingResponse()
             : ParseErrorToRpcException<CancelBookingResponse>(response.Errors);
     }
-    
+
     private T ParseErrorToRpcException<T>(List<IError> errors)
     {
         if (errors.Exists(x => x is NotFound))
@@ -37,7 +39,7 @@ public class BookingV1(IMediator mediator) : Booking.BookingBase
 
         if (errors.Exists(x => x is CommitFail))
             throw new RpcException(new Status(StatusCode.Unavailable, string.Join(' ', errors.Select(x => x.Message))));
-        
+
 
         throw new RpcException(new Status(StatusCode.InvalidArgument, string.Join(' ', errors.Select(x => x.Message))));
     }
@@ -46,6 +48,6 @@ public class BookingV1(IMediator mediator) : Booking.BookingBase
     {
         return Guid.TryParse(potentialId, out var id)
             ? id
-            : throw new ValueOutOfRangeException($"{nameof(potentialId)} is invalid uuid");
+            : throw new ValueIsUnsupportedException($"{nameof(potentialId)} is invalid uuid");
     }
 }

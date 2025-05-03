@@ -11,7 +11,7 @@ public class Inbox(NpgsqlDataSource dataSource) : IInbox
 
     private readonly JsonSerializerSettings _jsonSettings = new() { TypeNameHandling = TypeNameHandling.All };
 
-    public async Task<bool> Save(IInputConsumerEvent consumerEvent)
+    public async Task<bool> Save(IConvertibleToCommand consumerEvent)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
         await using var transaction = await connection.BeginTransactionAsync();
@@ -24,7 +24,7 @@ public class Inbox(NpgsqlDataSource dataSource) : IInbox
                 Content = JsonConvert.SerializeObject(consumerEvent, _jsonSettings),
                 OccurredOnUtc = DateTime.UtcNow,
             }, transaction);
-            
+
             await transaction.CommitAsync();
         }
         catch (PostgresException e) when (e is { SqlState: DuplicateKeyCode })
@@ -35,7 +35,7 @@ public class Inbox(NpgsqlDataSource dataSource) : IInbox
         {
             return false;
         }
-        
+
         return true;
     }
 

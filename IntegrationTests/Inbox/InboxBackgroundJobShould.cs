@@ -22,7 +22,7 @@ public class InboxBackgroundJobShould : IntegrationTestBase
         ContractResolver = new PrivateSetterContractResolver()
     };
 
-    private readonly IInputConsumerEvent _event =
+    private readonly IConvertibleToCommand _event =
         new VehicleAddedConsumerEvent(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
     [Fact]
@@ -41,7 +41,7 @@ public class InboxBackgroundJobShould : IntegrationTestBase
         Context.ChangeTracker.Clear();
         var existEvents = Context.Inbox.Take(1).ToList();
         var actualEvent =
-            JsonConvert.DeserializeObject<IInputConsumerEvent>(existEvents.First().Content, _jsonSerializerSettings);
+            JsonConvert.DeserializeObject<IConvertibleToCommand>(existEvents.First().Content, _jsonSerializerSettings);
         Assert.NotNull(actualEvent);
         Assert.Equivalent(_event, actualEvent);
     }

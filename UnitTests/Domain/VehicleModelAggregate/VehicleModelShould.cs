@@ -1,4 +1,4 @@
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 using Domain.VehicleModelAggregate;
 using JetBrains.Annotations;
@@ -11,7 +11,7 @@ public class VehicleModelShould
 {
     private readonly Guid _id = Guid.NewGuid();
     private readonly Category _category = Category.Create(Category.BCategory);
-    
+
     [Fact]
     public void CreateNewInstanceWithCorrectValues()
     {
@@ -37,7 +37,7 @@ public class VehicleModelShould
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
-    
+
     [Fact]
     public void ThrowValueIsRequiredExceptionIfCategoryIsNull()
     {

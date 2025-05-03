@@ -5,7 +5,7 @@ using Application.Ports.Postgres.Repositories;
 using Domain.BookingAggregate.DomainEvents;
 using Domain.CustomerAggregate;
 using Domain.SharedKernel.Errors;
-using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
 using Domain.SharedKernel.ValueObjects;
 using FluentResults;
 using JetBrains.Annotations;
@@ -19,13 +19,13 @@ namespace UnitTests.Application.DomainEventHandlers;
 public class BookingCanceledHandlerShould
 {
     private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]);
-    
+
     private readonly Mock<ICustomerRepository> _customerRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly Mock<IMessageBus> _messageBusMock = new();
 
     private readonly BookingCanceledDomainEvent _event = new(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-    
+
     private readonly BookingCanceledHandler _handler;
 
     public BookingCanceledHandlerShould()
@@ -36,7 +36,7 @@ public class BookingCanceledHandlerShould
         _handler = new BookingCanceledHandler(_customerRepositoryMock.Object, _unitOfWorkMock.Object,
             _messageBusMock.Object);
     }
-    
+
     [Fact]
     public async Task ThrowDataConsistencyViolationExceptionIfCustomerNotFound()
     {
@@ -49,7 +49,7 @@ public class BookingCanceledHandlerShould
         // Assert
         await Assert.ThrowsAsync<DataConsistencyViolationException>(Act);
     }
-    
+
     [Fact]
     public async Task CallMessageBusPublish()
     {

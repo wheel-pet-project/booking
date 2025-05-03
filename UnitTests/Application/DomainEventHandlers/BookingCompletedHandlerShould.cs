@@ -4,7 +4,7 @@ using Application.Ports.Postgres.Repositories;
 using Domain.BookingAggregate.DomainEvents;
 using Domain.CustomerAggregate;
 using Domain.SharedKernel.Errors;
-using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
 using Domain.SharedKernel.ValueObjects;
 using FluentResults;
 using JetBrains.Annotations;
@@ -18,12 +18,12 @@ namespace UnitTests.Application.DomainEventHandlers;
 public class BookingCompletedHandlerShould
 {
     private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]);
-    
+
     private readonly Mock<ICustomerRepository> _customerRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
 
     private readonly BookingCompletedDomainEvent _event = new(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
-    
+
     private readonly BookingCompletedHandler _handler;
 
     public BookingCompletedHandlerShould()
@@ -33,7 +33,7 @@ public class BookingCompletedHandlerShould
 
         _handler = new BookingCompletedHandler(_customerRepositoryMock.Object, _unitOfWorkMock.Object);
     }
-    
+
     [Fact]
     public async Task ThrowDataConsistencyViolationExceptionIfCustomerNotFound()
     {

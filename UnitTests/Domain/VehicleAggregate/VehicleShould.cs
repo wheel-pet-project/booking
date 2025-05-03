@@ -1,4 +1,4 @@
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 using Domain.VehicleAggregate;
 using Domain.VehicleModelAggregate;
@@ -14,9 +14,10 @@ public class VehicleShould
 
     private readonly Guid _sagaId = Guid.NewGuid();
     private readonly Guid _vehicleId = Guid.NewGuid();
+
     private readonly VehicleModel _vehicleModel =
         VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
-    
+
     [Fact]
     public void CreateNewInstanceWithCorrectValues()
     {

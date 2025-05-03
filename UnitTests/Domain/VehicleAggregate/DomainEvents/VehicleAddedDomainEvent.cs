@@ -1,4 +1,4 @@
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -9,7 +9,7 @@ public class VehicleAddedDomainEvent
 {
     private readonly Guid _sagaId = Guid.NewGuid();
     private readonly Guid _vehicleId = Guid.NewGuid();
-    
+
     [Fact]
     public void CreateNewInstanceWithCorrectValues()
     {
@@ -33,7 +33,7 @@ public class VehicleAddedDomainEvent
         // Assert
         Assert.Throws<ValueIsRequiredException>(Act);
     }
-    
+
     [Fact]
     public void ThrowValueIsRequiredExceptionIfVehicleIsEmpty()
     {

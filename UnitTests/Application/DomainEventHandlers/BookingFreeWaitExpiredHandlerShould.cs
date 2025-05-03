@@ -4,7 +4,7 @@ using Application.Ports.Postgres.Repositories;
 using Domain.BookingAggregate;
 using Domain.BookingAggregate.DomainEvents;
 using Domain.CustomerAggregate;
-using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
 using Domain.SharedKernel.ValueObjects;
 using Domain.VehicleAggregate;
 using Domain.VehicleModelAggregate;
@@ -20,20 +20,22 @@ namespace UnitTests.Application.DomainEventHandlers;
 public class BookingFreeWaitExpiredHandlerShould
 {
     private readonly Customer _customer = Customer.Create(Guid.NewGuid(), [Category.Create(Category.BCategory)]);
-    private readonly VehicleModel _vehicleModel = VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
-    
+
+    private readonly VehicleModel _vehicleModel =
+        VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
+
     private readonly Mock<IBookingRepository> _bookingRepositoryMock = new();
     private readonly Mock<IUnitOfWork> _unitOfWorkMock = new();
     private readonly TimeProvider _timeProvider = TimeProvider.System;
 
-    private readonly BookingFreeWaitExpiredDomainEvent _domainEvent = new(Guid.NewGuid()); 
-    
+    private readonly BookingFreeWaitExpiredDomainEvent _domainEvent = new(Guid.NewGuid());
+
     private readonly BookingFreeWaitExpiredHandler _handler;
 
     public BookingFreeWaitExpiredHandlerShould()
     {
         var fakeTimeProvider = new FakeTimeProvider(DateTimeOffset.UtcNow.AddHours(-1));
-        
+
         var vehicle = Vehicle.Create(Guid.NewGuid(), Guid.NewGuid(), _vehicleModel);
         var booking = Booking.Create(_customer, _vehicleModel, vehicle.Id);
         booking.Book(fakeTimeProvider);
@@ -44,7 +46,7 @@ public class BookingFreeWaitExpiredHandlerShould
         _handler = new BookingFreeWaitExpiredHandler(_bookingRepositoryMock.Object, _unitOfWorkMock.Object,
             _timeProvider);
     }
-    
+
     [Fact]
     public async Task CommitUpdates()
     {

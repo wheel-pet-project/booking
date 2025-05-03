@@ -1,6 +1,6 @@
 using Domain.BookingAggregate;
-using Domain.SharedKernel.Exceptions.AlreadyHaveThisState;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.InternalExceptions.AlreadyHaveThisState;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using JetBrains.Annotations;
 using Xunit;
 
@@ -35,7 +35,7 @@ public class StatusShould
         }
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class StatusShould
         }
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
 
     [Fact]
@@ -130,15 +130,15 @@ public class StatusShould
     [Fact]
     public void CanBeChangedToThisStatusReturnFalseForThisStatuses()
     {
-         // Arrange
-         
+        // Arrange
+
         // Act
         var inProcessToCompleted = Status.InProcess.CanBeChangedToThisStatus(Status.Completed);
-        
+
         var notBookedToBooked = Status.NotBooked.CanBeChangedToThisStatus(Status.Booked);
         var notBookedToCanceled = Status.NotBooked.CanBeChangedToThisStatus(Status.Canceled);
         var notBookedToCompleted = Status.NotBooked.CanBeChangedToThisStatus(Status.Completed);
-        
+
         var bookedToNotBooked = Status.Booked.CanBeChangedToThisStatus(Status.NotBooked);
         var bookedToInProcess = Status.Booked.CanBeChangedToThisStatus(Status.InProcess);
 
@@ -146,7 +146,7 @@ public class StatusShould
         var canceledToNotBooked = Status.Canceled.CanBeChangedToThisStatus(Status.NotBooked);
         var canceledToBooked = Status.Canceled.CanBeChangedToThisStatus(Status.Booked);
         var canceledToCompleted = Status.Canceled.CanBeChangedToThisStatus(Status.Completed);
-        
+
         var completedToInProcess = Status.Completed.CanBeChangedToThisStatus(Status.InProcess);
         var completedToNotBooked = Status.Completed.CanBeChangedToThisStatus(Status.NotBooked);
         var completedToBooked = Status.Completed.CanBeChangedToThisStatus(Status.Booked);
@@ -154,19 +154,19 @@ public class StatusShould
 
         // Assert
         Assert.False(inProcessToCompleted);
-        
+
         Assert.False(notBookedToBooked);
         Assert.False(notBookedToCanceled);
         Assert.False(notBookedToCompleted);
-        
+
         Assert.False(bookedToNotBooked);
         Assert.False(bookedToInProcess);
-        
+
         Assert.False(canceledToInProcess);
         Assert.False(canceledToNotBooked);
         Assert.False(canceledToBooked);
         Assert.False(canceledToCompleted);
-        
+
         Assert.False(completedToInProcess);
         Assert.False(completedToNotBooked);
         Assert.False(completedToBooked);
@@ -182,7 +182,7 @@ public class StatusShould
         var inProcessToNotBooked = Status.InProcess.CanBeChangedToThisStatus(Status.NotBooked);
         var inProcessToBooked = Status.InProcess.CanBeChangedToThisStatus(Status.Booked);
         var inProcessToCanceled = Status.InProcess.CanBeChangedToThisStatus(Status.Canceled);
-        
+
         var bookedToCanceled = Status.Booked.CanBeChangedToThisStatus(Status.Canceled);
         var bookedToCompleted = Status.Booked.CanBeChangedToThisStatus(Status.Completed);
 
@@ -190,7 +190,7 @@ public class StatusShould
         Assert.True(inProcessToNotBooked);
         Assert.True(inProcessToBooked);
         Assert.True(inProcessToCanceled);
-        
+
         Assert.True(bookedToCanceled);
         Assert.True(bookedToCompleted);
     }

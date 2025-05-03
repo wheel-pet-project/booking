@@ -1,5 +1,5 @@
 using CSharpFunctionalExtensions;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 
 namespace Domain.CustomerAggregate;
 
@@ -22,22 +22,34 @@ public sealed class LoyaltyPoints : ValueObject
     public static LoyaltyPoints Create(int startPoints = 1)
     {
         if (startPoints < LowestPoints.Value)
-            throw new ValueOutOfRangeException($"{startPoints} cannot be less than {LowestPoints.Value}");
+            throw new ValueIsUnsupportedException($"{startPoints} cannot be less than {LowestPoints.Value}");
         if (startPoints > HighestPoints.Value)
-            throw new ValueOutOfRangeException($"{startPoints} cannot be greater than {HighestPoints.Value}");
+            throw new ValueIsUnsupportedException($"{startPoints} cannot be greater than {HighestPoints.Value}");
 
         return new LoyaltyPoints(startPoints);
     }
 
     public static LoyaltyPoints CreateFromTrips(int trips, int canceledBookings)
     {
-        var loyaltyPoints = trips / Math.Pow(canceledBookings, canceledBookings / 4.0) * 10.0;
+        var loyaltyPoints = CalculateLoyaltyPoints(trips, canceledBookings);
+        var pointsInBorders = LeadPointsToBorders(loyaltyPoints);
 
-        var roundedPoints = Math.Round(loyaltyPoints, 3);
-        if (roundedPoints < LowestPoints.Value) roundedPoints = LowestPoints.Value;
-        if (roundedPoints > HighestPoints.Value) roundedPoints = HighestPoints.Value;
+        return new LoyaltyPoints(Convert.ToInt32(pointsInBorders));
 
-        return new LoyaltyPoints(Convert.ToInt32(roundedPoints));
+        double CalculateLoyaltyPoints(int tripsQuantity, int canceled)
+        {
+            var points = tripsQuantity / Math.Pow(canceled, canceled / 4.0) * 10.0;
+
+            return Math.Round(points, 3);
+        }
+
+        double LeadPointsToBorders(double points)
+        {
+            if (points < LowestPoints.Value) return LowestPoints.Value;
+            if (points > HighestPoints.Value) return HighestPoints.Value;
+
+            return points;
+        }
     }
 
     public static bool operator <(LoyaltyPoints? a, LoyaltyPoints? b)
@@ -52,7 +64,7 @@ public sealed class LoyaltyPoints : ValueObject
     {
         if (a is null || b is null)
             return false;
-        
+
         return !(a < b);
     }
 

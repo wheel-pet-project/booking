@@ -1,6 +1,6 @@
 using Domain.CustomerAggregate;
-using Domain.SharedKernel.Exceptions.ArgumentException;
-using Domain.SharedKernel.Exceptions.DomainRulesViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 using JetBrains.Annotations;
 using Xunit;
@@ -121,7 +121,7 @@ public class LevelShould
         // Assert
         Assert.Equal(FreeWait.IncreaseFreeWait, actual);
     }
-    
+
     [Fact]
     public void FromNameReturnCorrectLevel()
     {
@@ -145,7 +145,7 @@ public class LevelShould
         void Act() => Level.FromName(invalidName);
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
 
     [Fact]
@@ -171,9 +171,9 @@ public class LevelShould
         void Act() => Level.FromId(invalidId);
 
         // Assert
-        Assert.Throws<ValueOutOfRangeException>(Act);
+        Assert.Throws<ValueIsUnsupportedException>(Act);
     }
-    
+
     [Fact]
     public void EqualOperatorReturnTrueForEqualLevels()
     {

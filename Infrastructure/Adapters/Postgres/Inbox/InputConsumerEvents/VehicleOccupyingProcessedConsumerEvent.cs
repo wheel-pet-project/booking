@@ -5,16 +5,16 @@ using MediatR;
 namespace Infrastructure.Adapters.Postgres.Inbox.InputConsumerEvents;
 
 public class VehicleOccupyingProcessedConsumerEvent(
-    Guid eventId, 
+    Guid eventId,
     Guid bookingId,
     bool isOccupied,
-    string? reason) : IInputConsumerEvent
+    string? reason) : IConvertibleToCommand
 {
     public Guid EventId { get; } = eventId;
     public Guid BookingId { get; } = bookingId;
     public bool IsOccupied { get; } = isOccupied;
     public string? Reason { get; } = reason;
-    
+
     public IRequest<Result> ToCommand()
     {
         return new ProcessOccupationOfVehicleCommand(BookingId, IsOccupied);

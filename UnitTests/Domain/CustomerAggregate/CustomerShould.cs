@@ -1,5 +1,5 @@
 using Domain.CustomerAggregate;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.SharedKernel.ValueObjects;
 using Domain.VehicleModelAggregate;
 using JetBrains.Annotations;
@@ -11,13 +11,13 @@ namespace UnitTests.Domain.CustomerAggregate;
 public class CustomerShould
 {
     private readonly Guid _id = Guid.NewGuid();
-    private readonly List<Category> _categories = [ Category.Create(Category.BCategory) ];
-    
+    private readonly List<Category> _categories = [Category.Create(Category.BCategory)];
+
     [Fact]
     public void CreateNewInstanceWithCorrectValues()
     {
         // Arrange
-        
+
         // Act
         var actual = Customer.Create(_id, _categories);
 
@@ -78,33 +78,33 @@ public class CustomerShould
         // Assert
         Assert.Equal(Level.Trustworthy, customer.Level);
     }
-    
+
     [Fact]
     public void CanBookThisVehicleModelReturnTrueForVehicleIfCustomerHaveCategory()
     {
         // Arrange
         var customer = Customer.Create(_id, _categories);
         var vehicleModel = VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
-    
+
         // Act
         var actual = customer.CanBookThisVehicleModel(vehicleModel);
-    
+
         // Assert
         Assert.True(actual);
     }
-    
+
     [Fact]
     public void CanBookThisVehicleModelReturnFalseIfCustomerCannotBooking()
     {
         // Arrange
         var customer = Customer.Create(_id, _categories);
         var vehicleModel = VehicleModel.Create(Guid.NewGuid(), Category.Create(Category.BCategory));
-       
+
         customer.RevokeBookingRights();
-    
+
         // Act
         var actual = customer.CanBookThisVehicleModel(vehicleModel);
-        
+
         // Assert
         Assert.False(actual);
     }

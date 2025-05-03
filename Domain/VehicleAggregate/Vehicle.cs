@@ -1,5 +1,5 @@
 using Domain.SharedKernel;
-using Domain.SharedKernel.Exceptions.ArgumentException;
+using Domain.SharedKernel.Exceptions.PublicExceptions;
 using Domain.VehicleAggregate.DomainEvents;
 using Domain.VehicleModelAggregate;
 
@@ -18,7 +18,7 @@ public sealed class Vehicle : Aggregate
         IsDeleted = false;
     }
 
-    public Guid Id { get; private set; }
+    public Guid Id { get; }
     public Guid VehicleModelId { get; private set; }
     public bool IsDeleted { get; private set; }
 
@@ -34,9 +34,9 @@ public sealed class Vehicle : Aggregate
         if (vehicleModel == null) throw new ValueIsRequiredException($"{nameof(vehicleModel)} cannot be null");
 
         var vehicle = new Vehicle(id, vehicleModel.Id);
-        
+
         vehicle.AddDomainEvent(new VehicleAddedDomainEvent(sagaId, vehicle.Id));
-        
+
         return vehicle;
     }
 }

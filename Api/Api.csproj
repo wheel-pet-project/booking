@@ -10,7 +10,7 @@
     <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
         <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-        <PackageReference Include="From.BookingKafkaEvents" Version="1.2.0" />
+        <PackageReference Include="From.BookingKafkaEvents" Version="1.2.1"/>
         <PackageReference Include="From.DrivingLicenseKafkaEvents" Version="1.2.0" />
         <PackageReference Include="From.VehicleCheckKafkaEvents" Version="1.1.0" />
         <PackageReference Include="From.VehicleFleetKafkaEvents" Version="1.4.2" />

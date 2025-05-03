@@ -1,6 +1,6 @@
 using Application.Ports.Postgres;
 using Application.Ports.Postgres.Repositories;
-using Domain.SharedKernel.Exceptions.DataConsistencyViolationException;
+using Domain.SharedKernel.Exceptions.InternalExceptions;
 using FluentResults;
 using MediatR;
 
@@ -14,16 +14,17 @@ public class ProcessOccupationOfVehicleHandler(
     public async Task<Result> Handle(ProcessOccupationOfVehicleCommand command, CancellationToken _)
     {
         var booking = await bookingRepository.GetById(command.BookingId);
-        if (booking == null) throw new DataConsistencyViolationException(
-            $"Booking with id: {command.BookingId} not found for marking as not booked");
-        
-        if (command.IsOccupied) 
+        if (booking == null)
+            throw new DataConsistencyViolationException(
+                $"Booking with id: {command.BookingId} not found for marking as not booked");
+
+        if (command.IsOccupied)
             booking.Book(timeProvider);
         else
             booking.MarkAsNotBooked();
 
         bookingRepository.Update(booking);
-        
+
         return await unitOfWork.Commit();
     }
 }
