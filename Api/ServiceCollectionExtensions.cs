@@ -142,7 +142,7 @@ public static class ServiceCollectionExtensions
 
             x.AddRider(rider =>
             {
-                const string bookingGroupId = bookingGroupId;
+                const string bookingGroupId = "booking-consumer-group";
 
                 rider.AddConsumer<VehicleAddedConsumer>();
                 rider.AddConsumer<VehicleDeletedConsumer>();
